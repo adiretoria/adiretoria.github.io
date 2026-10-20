@@ -1,0 +1,9 @@
+{
+  "banco": "../radar-ofertas/dados/radar.db",
+  "dias": 7,
+  "maxOfertas": 400,
+  "grupos": {
+    "whatsapp": "",
+    "telegram": "https://t.me/adiretoriacompras"
+  }
+}

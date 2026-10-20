@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>A Diretoria — ofertas aprovadas em ata</title>
+<meta name="description" content="As ofertas que A Diretoria publicou nos grupos de WhatsApp e Telegram: busque, filtre por loja e vá direto ao produto.">
+<meta property="og:title" content="A Diretoria — ofertas aprovadas em ata">
+<meta property="og:description" content="Ofertas da Amazon, Mercado Livre, Shopee e Magalu aprovadas pela Diretoria.">
+<meta property="og:image" content="img/a-diretoria-capa.png">
+<meta name="theme-color" content="#0B1F3A">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<link rel="icon" href="img/a-diretoria-foto-perfil.png">
+<link rel="preload" href="fontes/Manrope-VF.ttf" as="font" type="font/ttf" crossorigin>
+<link rel="stylesheet" href="estilo.css">
+</head>
+<body>
+<a class="pular" href="#pauta">Pular para as ofertas</a>
+<header class="topo">
+  <div class="topo-dentro">
+    <a class="marca" href="./" aria-label="A Diretoria, início">
+      <span class="marca-nome">A DIRETORIA</span>
+      <span class="marca-sub">Ofertas aprovadas em ata</span>
+    </a>
+    <nav class="grupos" aria-label="Entrar nos grupos">
+      <a class="grupo grupo-wa" id="grupo-whatsapp" hidden rel="noopener" target="_blank">WhatsApp<span class="longo">: entrar no grupo</span></a>
+      <a class="grupo grupo-tg" id="grupo-telegram" hidden rel="noopener" target="_blank">Telegram<span class="longo">: entrar no grupo</span></a>
+    </nav>
+  </div>
+</header>
+
+<main id="pauta" tabindex="-1">
+  <section class="abertura" aria-labelledby="titulo">
+    <p class="saudacao">Prezado conselheiro,</p>
+    <h1 id="titulo">Pauta de hoje</h1>
+    <p class="resumo" id="resumo" aria-live="polite">Carregando as ofertas aprovadas…</p>
+  </section>
+
+  <div class="abas" role="tablist" aria-label="O que ver">
+    <button role="tab" id="aba-ofertas" aria-controls="painel-ofertas" aria-selected="true">Ofertas</button>
+    <button role="tab" id="aba-cupons" aria-controls="painel-cupons" aria-selected="false" tabindex="-1">Cupons</button>
+  </div>
+
+  <form class="filtros" id="filtros" role="search" aria-label="Buscar e filtrar">
+    <div class="campo-busca">
+      <label for="busca">Buscar produto ou cupom</label>
+      <input id="busca" name="q" type="search" placeholder="Ex.: air fryer, fone, tênis" autocomplete="off">
+    </div>
+    <fieldset class="lojas">
+      <legend>Loja</legend>
+      <div class="chips" id="chips-lojas"></div>
+    </fieldset>
+    <div class="campo-ordem" id="campo-ordem">
+      <label for="ordem">Ordenar por</label>
+      <select id="ordem" name="ordem">
+        <option value="recentes">Mais recentes</option>
+        <option value="desconto">Maior desconto</option>
+        <option value="menor">Menor preço</option>
+        <option value="maior">Maior preço</option>
+      </select>
+    </div>
+  </form>
+
+  <section id="painel-ofertas" role="tabpanel" aria-labelledby="aba-ofertas">
+    <h2 class="vh">Ofertas</h2>
+    <ol class="grade" id="lista-ofertas"></ol>
+    <p class="vazio" id="vazio-ofertas" hidden></p>
+    <div class="mais"><button type="button" id="mais-ofertas" hidden>Mostrar mais ofertas</button></div>
+  </section>
+
+  <section id="painel-cupons" role="tabpanel" aria-labelledby="aba-cupons" hidden>
+    <h2 class="vh">Cupons</h2>
+    <ol class="cupons" id="lista-cupons"></ol>
+    <p class="vazio" id="vazio-cupons" hidden></p>
+  </section>
+</main>
+
+<footer class="rodape">
+  <div class="rodape-dentro">
+    <p><strong>Como funciona.</strong> Cada oferta aqui foi publicada nos grupos da Diretoria. O preço mostrado é o do momento da publicação: preço, estoque e cupom podem mudar na loja, então confira antes de comprar.</p>
+    <p><strong>Links de afiliado.</strong> A Diretoria participa dos programas de afiliados da Amazon, Mercado Livre, Shopee e Magazine Luiza e pode receber comissão pelas compras feitas pelos links, sem custo extra para você.</p>
+    <p class="atualizado" id="atualizado"></p>
+  </div>
+</footer>
+
+<template id="modelo-oferta">
+  <li class="oferta">
+    <a class="oferta-link" rel="sponsored nofollow noopener" target="_blank">
+      <div class="foto"><img alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer"></div>
+      <div class="carimbo" aria-hidden="true"><span class="carimbo-topo">Aprovado</span><span class="carimbo-pct"></span></div>
+      <div class="corpo">
+        <p class="loja"></p>
+        <h3 class="nome"></h3>
+        <p class="selo"></p>
+        <p class="precos"><span class="de"></span><span class="por"></span></p>
+        <p class="pix"></p>
+        <p class="quando"></p>
+        <span class="ver">Ver na loja</span>
+      </div>
+    </a>
+  </li>
+</template>
+
+<template id="modelo-cupom">
+  <li class="cupom">
+    <div class="cupom-valor"></div>
+    <div class="cupom-corpo">
+      <p class="loja"></p>
+      <h3 class="cupom-titulo"></h3>
+      <p class="cupom-regras"></p>
+    </div>
+    <a class="cupom-link" rel="sponsored nofollow noopener" target="_blank">Usar cupom</a>
+  </li>
+</template>
+
+<script src="app.js" type="module"></script>
+</body>
+</html>
