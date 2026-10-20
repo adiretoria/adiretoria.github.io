@@ -7,7 +7,7 @@
     "telegram": "https://t.me/adiretoriacompras"
   },
   "amazon": {
-    "ativo": false,
-    "tag": ""
+    "ativo": true,
+    "tag": "adiretoria0cd-20"
   }
 }
