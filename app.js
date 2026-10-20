@@ -1,6 +1,13 @@
 // Vitrine estática: lê dados/ofertas.json (gerado pelo exportador a partir das publicações dos grupos),
 // busca, filtra por loja e ordena no navegador. Textos dos dados entram só via textContent.
 const LOJAS = { mercadolivre: 'Mercado Livre', amazon: 'Amazon', shopee: 'Shopee', magalu: 'Magalu' };
+// "No Mercado Livre ✓": onde a oferta está (não "vendido por": em marketplace quem vende pode ser um lojista).
+const CHECK = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 13.5l3.6-3.2 4.3 4.9L18.6 3 22.4 6 10.2 21z" fill="currentColor"/></svg>';
+function linhaLoja(el, loja) {
+  el.replaceChildren('No ', Object.assign(document.createElement('strong'), { textContent: LOJAS[loja] }));
+  el.insertAdjacentHTML('beforeend', CHECK);
+  el.dataset.loja = loja;
+}
 const POR_PAGINA = 24;
 const $ = (id) => document.getElementById(id);
 const reais = (c) => (c / 100).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -76,7 +83,7 @@ function cartaoOferta(o) {
   const pct = desconto(o);
   if (pct >= 5) el.querySelector('.carimbo-pct').textContent = `−${pct}%`;
   else el.querySelector('.carimbo').hidden = true;
-  el.querySelector('.loja').textContent = LOJAS[o.loja];
+  linhaLoja(el.querySelector('.loja'), o.loja);
   el.querySelector('.nome').textContent = o.nome;
   el.querySelector('.selo').textContent = [o.selo, o.cupom].filter(Boolean).join(' · ');
   if (o.de) el.querySelector('.de').textContent = reais(o.de);
@@ -95,7 +102,7 @@ function cartaoCupom(c) {
   else if (c.valor && c.tipo === 'fixo') v.textContent = `R$${Number.isInteger(c.valor) ? c.valor : c.valor.toFixed(2).replace('.', ',')}`;
   else v.textContent = 'Cupom';
   if (c.valor) { const s = document.createElement('small'); s.textContent = 'de desconto'; v.append(s); }
-  el.querySelector('.loja').textContent = LOJAS[c.loja];
+  linhaLoja(el.querySelector('.loja'), c.loja);
   el.querySelector('.cupom-titulo').textContent = c.titulo;
   const regras = [c.detalhe, c.minimo ? `Compra mínima ${reais(c.minimo)}` : null, c.teto ? `limite de ${reais(c.teto)}` : null,
     c.validade ? `válido até ${new Date(c.validade).toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' })}` : null].filter(Boolean);
@@ -104,6 +111,34 @@ function cartaoCupom(c) {
   a.href = c.link;
   a.setAttribute('aria-label', `Usar cupom ${c.titulo} na ${LOJAS[c.loja]}`);
   return el;
+}
+
+// Blocos das lojas parceiras (nas cores de cada loja): mostram quantas ofertas há e filtram ao tocar.
+function blocosParceiras() {
+  const base = estado.aba === 'cupons' ? dados.cupons : dados.ofertas;
+  const ordem = ['mercadolivre', 'shopee', 'magalu', 'amazon'];
+  $('parceiras').replaceChildren(...ordem.filter((l) => base.some((x) => x.loja === l) || dados.ofertas.some((x) => x.loja === l)).map((l) => {
+    const n = base.filter((x) => x.loja === l).length;
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = `parceira parceira-${l}`;
+    b.setAttribute('aria-pressed', String(estado.loja === l));
+    b.setAttribute('aria-label', `${LOJAS[l]}: ${n} ${estado.aba === 'cupons' ? 'cupons' : 'ofertas'}${estado.loja === l ? ', filtro ativo' : ''}`);
+    const nome = document.createElement('span');
+    nome.className = 'parceira-nome';
+    nome.textContent = LOJAS[l];
+    const qt = document.createElement('span');
+    qt.className = 'parceira-qt';
+    qt.textContent = `${n} ${estado.aba === 'cupons' ? (n === 1 ? 'cupom' : 'cupons') : (n === 1 ? 'oferta' : 'ofertas')}`;
+    b.append(nome, qt);
+    b.addEventListener('click', () => {
+      estado.loja = estado.loja === l ? '' : l;
+      estado.limite = POR_PAGINA;
+      render();
+      $(estado.aba === 'cupons' ? 'painel-cupons' : 'painel-ofertas').scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' });
+    });
+    return b;
+  }));
 }
 
 function chipsLojas() {
@@ -134,6 +169,7 @@ function render() {
   $('painel-cupons').hidden = !cupons;
   $('campo-ordem').hidden = cupons;
   chipsLojas();
+  blocosParceiras();
   const filtro = estado.q || estado.loja ? ' Limpe a busca ou escolha outra loja.' : '';
   if (cupons) {
     const lista = filtrarCupons();

@@ -48,7 +48,7 @@ test('links: só https das lojas, sem porta nem credenciais', () => {
 
 test('grupos: só convites do WhatsApp e do Telegram', () => {
   const d = montarDados(banco());
-  assert.deepEqual(Object.keys(d.grupos), ['telegram']); // WhatsApp vazio no config até ser informado
+  assert.deepEqual(Object.keys(d.grupos).sort(), ["telegram", "whatsapp"]);
 });
 
 test('Amazon: fora do site com a conta inativa; ativa, só nome e link direto com a tag (sem preço, imagem ou selo)', async () => {
