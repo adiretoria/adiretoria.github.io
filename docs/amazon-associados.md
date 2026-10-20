@@ -21,7 +21,7 @@ Pelas regras oficiais, havia ainda outros problemas:
 ## Antes de se inscrever de novo
 
 1. Cadastre o **site** como site principal na "Lista de sites ou apps":
-   `https://paparidisbrancher.github.io/adiretoria/`.
+   `https://adiretoria.github.io/`.
    Cadastre o Instagram só se ele tiver links da Amazon com a tag. A ajuda da Amazon fala em redes públicas com
    pelo menos 500 seguidores.
 2. Logo depois da inscrição a Amazon já dá a nova tag (`xxxxx-20`), com a conta "temporariamente aprovada".
@@ -31,7 +31,7 @@ Pelas regras oficiais, havia ainda outros problemas:
 3. Confira se o site mostra ofertas da Amazon com a tag nova. A revisão acontece depois das primeiras visitas, e
    a Amazon precisa encontrar links com a tag **no site cadastrado**.
 4. Nos grupos, divulgue o link da página intermediária da oferta
-   (`https://paparidisbrancher.github.io/adiretoria/amazon/?asin=ASIN`), não o link direto da Amazon.
+   (`https://adiretoria.github.io/amazon/?asin=ASIN`), não o link direto da Amazon.
    **Isso exige uma mudança no robô** (o link da Amazon na mensagem vira o link da página). Ela ainda não foi feita
    porque há trabalho do Codex sem commit na pasta do robô.
 5. Não volte a ligar a busca automática da Amazon com coleta de páginas. O caminho permitido para preço, imagem e
