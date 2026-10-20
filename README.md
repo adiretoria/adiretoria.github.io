@@ -16,8 +16,24 @@ O que entra:
 - cupons publicados nos grupos e ainda válidos, com o mesmo link de compra que foi para o grupo. As
   campanhas de comissão da Shopee ficam de fora, porque não são desconto para o cliente.
 
-O preço mostrado é o do momento da publicação. O site mostra há quanto tempo a oferta foi aprovada e,
-depois de 24 h, avisa que o preço pode ter mudado.
+Publicação e conferência de preço são datas distintas. O registro pode ser atualizado por uma coleta posterior;
+o site não afirma que o preço é uma cópia imutável da publicação. Sem coleta/edição informada ou após 24 h,
+o valor aparece como preço registrado, com aviso para conferir na loja e fora dos destaques.
+
+Por padrão aparecem publicações das últimas 48 h. “Ver ofertas anteriores” inclui o restante da janela de 7 dias.
+A busca combina loja, categoria e faixas de preço; Amazon, sem preço público, fica fora das faixas e no fim da
+ordenação por menor preço. A categoria é inferida do nome quando a fonte não informa uma.
+
+`regras.js` é compartilhado pelo navegador e pelo exportador. Cupom só gera preço calculado se tiver elegibilidade
+explicitamente confirmada, validade em aberto e mínimo atingido pelo produto. Os cupons coletados atualmente
+não comprovam elegibilidade individual: aparecem como condições, sem abatimento automático. Pix e cupom
+não são somados. O marcador explícito “preço já com o cupom” impede descontar o mesmo benefício novamente;
+uma etiqueta separada “OFF com Cupom” não comprova inclusão. A validade sem hora encerra às 23h59 de Brasília.
+
+“Escolhas da Diretoria” reúne até seis produtos recentes, com imagem e coleta nas últimas 24 h, pelo menos
+20% abaixo da referência da loja, até dois por categoria e sem nomes muito semelhantes. A prioridade combina
+conferência recente com desconto limitado a 40 pontos, para não privilegiar referências infladas. Essa seleção
+não afirma menor preço do mercado. O compartilhamento usa as mesmas condições de preço do cartão.
 
 ## Configurar
 
@@ -31,7 +47,7 @@ depois de 24 h, avisa que o preço pode ter mudado.
 
 - `npm run exportar`: gera `dados/ofertas.json` sem publicar.
 - `npm run publicar`: gera e envia ao GitHub.
-- `npm test`: testes do exportador.
+- `npm test`: testes de preço, elegibilidade, datas, categorias, filtros, curadoria, compartilhamento e exportação.
 - `powershell -ExecutionPolicy Bypass -File exportador\agendar.ps1`: liga a atualização a cada 15 min
   (`-Remover` desliga; o site continua no ar com a última lista).
 
@@ -53,7 +69,7 @@ Passo a passo para pedir de novo: [docs/amazon-associados.md](docs/amazon-associ
 ## Publicar mudanças de visual
 
 Ao mudar `estilo.css` ou `app.js`, troque o `?v=` nos `<link>`/`<script>` do `index.html` (e o do CSS em
-`amazon/index.html`). Sem isso, quem abriu o site nos últimos 10 minutos pode ver a página nova com o script velho
+`amazon/index.html`) e o import de `regras.js` em `app.js`. Sem isso, quem abriu o site nos últimos 10 minutos pode ver a página nova com o script velho
 (o GitHub Pages guarda os arquivos em cache).
 
 Logos das lojas (`img/lojas/`): versões do Wikimedia Commons; Shopee e Magalu recoloridas em branco para o fundo

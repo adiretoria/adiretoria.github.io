@@ -9,6 +9,7 @@
   --texto: Archivo, system-ui, sans-serif;
 }
 * { box-sizing: border-box; }
+[hidden] { display: none !important; }
 html { -webkit-text-size-adjust: 100%; }
 body { margin: 0; background: var(--papel); color: var(--azul); font: 16px/1.5 var(--texto); -webkit-font-smoothing: antialiased; }
 a { color: inherit; }
@@ -37,16 +38,16 @@ main { max-width: 1200px; margin: 0 auto; padding: 0 24px 72px; }
 main:focus { outline: none; }
 
 /* Abertura: folha de ata pautada com a margem coral */
-.abertura { position: relative; margin: 0 -24px; padding: 40px 24px 28px 64px; border-bottom: 2px solid var(--azul);
+.abertura { position: relative; margin: 0 -24px; padding: 24px 24px 22px 64px; border-bottom: 2px solid var(--azul);
   background: linear-gradient(90deg, transparent 30px, var(--coral-claro) 30px, var(--coral-claro) 36px, transparent 36px),
     repeating-linear-gradient(180deg, transparent 0 47px, var(--linha) 47px 49px); }
 .abertura .rotulo { margin: 0; }
 .titulo-linha { display: flex; align-items: center; gap: 22px; flex-wrap: wrap; margin: 6px 0 0; }
-h1 { margin: 0; font-family: var(--display); font-weight: 400; font-size: clamp(54px, 9vw, 112px); line-height: .95; letter-spacing: -.005em; text-transform: uppercase; }
+h1 { margin: 0; font-family: var(--display); font-weight: 400; font-size: clamp(48px, 7vw, 82px); line-height: 1; letter-spacing: -.005em; text-transform: uppercase; }
 .carimbo-titulo { display: inline-block; transform: rotate(-6deg); background: var(--lima); color: var(--azul); padding: 6px; }
 .carimbo-titulo svg { width: .8em; height: .8em; margin-left: .25em; vertical-align: -.05em; }
 .carimbo-titulo span { display: block; border: 3px solid var(--azul); padding: 4px 16px 2px; font-family: var(--display); font-size: clamp(22px, 3.2vw, 34px); line-height: 1.1; text-transform: uppercase; }
-.resumo { margin: 16px 0 0; font-size: 18px; max-width: 60ch; }
+.resumo { margin: 12px 0 0; font-size: 17px; max-width: 60ch; }
 
 /* Lojas parceiras: um bloco por loja, nas cores dela, com o nome escrito (sem logotipo de terceiros). */
 .parceiras { padding: 26px 0 4px; }
@@ -196,7 +197,7 @@ input:focus, select:focus { outline: none; box-shadow: 0 0 0 4px var(--lima); }
 
 /* Compartilhar no WhatsApp (canto da foto) */
 .oferta { position: relative; }
-.compartilhar { position: absolute; z-index: 2; top: 10px; left: 10px; display: grid; place-items: center; width: 40px; height: 40px; border-radius: 50%; background: var(--branco); color: #1A8D4A; border: 2px solid var(--azul); }
+.compartilhar { position: absolute; z-index: 2; top: 10px; left: 10px; display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; background: var(--branco); color: #1A8D4A; border: 2px solid var(--azul); }
 .compartilhar svg { width: 22px; height: 22px; }
 .compartilhar:hover { background: var(--lima); }
 .oferta-amazon .compartilhar { top: auto; bottom: 12px; left: auto; right: 12px; }
@@ -228,7 +229,7 @@ input:focus, select:focus { outline: none; box-shadow: 0 0 0 4px var(--lima); }
   .oferta .carimbo { top: auto; bottom: 8px; left: 6px; right: auto; }
   .oferta .corpo { padding: 10px 12px 12px; gap: 3px; }
   .oferta .ver { padding: 9px; font-size: 14px; }
-  .oferta .compartilhar { width: 34px; height: 34px; top: 6px; left: 6px; }
+  .oferta .compartilhar { width: 44px; height: 44px; top: 6px; left: 6px; }
   .oferta .compartilhar svg { width: 18px; height: 18px; }
   .oferta-amazon .oferta-link { grid-template-columns: minmax(0, 1fr); }
   .oferta-amazon .compartilhar { top: auto; left: auto; }
@@ -238,4 +239,74 @@ input:focus, select:focus { outline: none; box-shadow: 0 0 0 4px var(--lima); }
   .barra-grupos .grupo { flex: 1; justify-content: center; }
   .barra-grupos .grupo-tg { flex: 0 0 auto; }
   .rodape-dentro { padding-bottom: 96px; }
+}
+
+/* Busca próxima da abertura; lojas em controles compactos, sem repetir os blocos de marca. */
+.filtros { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto; align-items: end; padding-bottom: 20px; }
+.campo-busca { grid-column: 1 / -1; }
+.lojas { grid-column: 1 / -1; }
+.chip { display: inline-flex; align-items: center; gap: 6px; }
+.chip-logo { width: 27px; height: 22px; object-fit: contain; }
+.chip-shopee .chip-logo, .chip-magalu .chip-logo { background: var(--azul); border-radius: 2px; padding: 2px; }
+.chip small { margin-left: 0; }
+.filtros label.anteriores { grid-column: 1 / -1; display: flex; gap: 10px; align-items: center; margin: 0; min-height: 44px; cursor: pointer; font-weight: 500; }
+.anteriores input { width: 22px; height: 22px; min-height: 0; margin: 0; accent-color: var(--azul); flex-shrink: 0; }
+.filtros-resumo { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; border-top: 1px solid var(--linha); padding-top: 12px; }
+#contagem { margin: 0; font-size: 14px; }
+.filtros-ativos { display: flex; flex-wrap: wrap; gap: 6px; }
+.filtro-ativo, .limpar, .erro button { font: inherit; font-size: 14px; min-height: 44px; padding: 8px 12px; color: var(--azul); background: var(--branco); border: 1px solid var(--azul); cursor: pointer; }
+.filtro-ativo { background: var(--lima); overflow-wrap: anywhere; text-align: left; }
+.limpar { text-decoration: underline; border-color: transparent; background: transparent; }
+.destaques { padding: 12px 0 28px; }
+.destaques .rotulo { font-size: 17px; letter-spacing: .12em; margin-bottom: 4px; }
+.destaques-criterio { font-size: 13px; color: var(--cinza); margin: 0 0 12px; max-width: 80ch; }
+.destaque-condicao { font-size: 12px; }
+.destaque-preco { margin-top: auto; padding-top: 5px; }
+.preco-condicao { margin: 0; font-size: 14px; font-weight: 700; }
+.alternativas { margin: 0; font-size: 13px; color: var(--cinza); }
+.cupom-aviso { margin: 3px 0; font-size: 12px; line-height: 1.4; color: var(--alerta); }
+.cupom-aviso:empty { display: none; }
+.alternativas:empty, .preco-status:empty { display: none; }
+.preco-status { color: var(--alerta); font-size: 12px; font-weight: 700; margin: 4px 0 0; }
+.condicoes { background: var(--papel); border: 2px solid var(--azul); border-top: 0; font-size: 13px; }
+.condicoes summary { padding: 10px 12px; cursor: pointer; min-height: 44px; font-weight: 700; }
+.condicoes ul { margin: 0; padding: 0 16px 14px 30px; }
+.condicoes li + li { margin-top: 8px; }
+.oferta { display: flex; flex-direction: column; min-width: 0; }
+.oferta-link { flex: 1; height: auto; }
+.nome { display: block; overflow: visible; overflow-wrap: anywhere; }
+.de { font-size: 12px; }
+.oferta-amazon .ver { padding-right: 54px; }
+.sem-foto::after { content: 'Imagem indisponível'; position: absolute; inset: 50% 8px auto; text-align: center; font-size: 12px; color: var(--cinza); }
+.erro { padding: 18px; background: var(--branco); border: 2px solid var(--alerta); }
+html { scroll-padding-bottom: 90px; }
+@media (min-width: 761px) { .campo-busca { max-width: 680px; } }
+@media (max-width: 760px) {
+  .abertura { padding-top: 20px; padding-bottom: 18px; }
+  .titulo-linha { gap: 10px; }
+  .carimbo-titulo span { font-size: 19px; padding: 4px 8px 2px; }
+  .carimbo-titulo { padding: 4px; }
+  .abertura .rotulo { font-size: 10px; letter-spacing: .18em; }
+  .filtros { grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 12px; }
+  .campo-ordem { grid-column: 1 / -1; }
+  .chips { flex-wrap: wrap; overflow: visible; }
+  .chip { padding: 6px 10px; font-size: 13px; }
+  .chip-logo { width: 22px; height: 18px; }
+  .chip small { font-size: 11px; }
+  .filtros label, .filtros legend { font-size: 12px; }
+  select { padding: 10px 8px; font-size: 14px; }
+  .filtros-resumo { gap: 6px; }
+  #contagem { width: 100%; }
+  .destaques-lista { grid-auto-columns: 160px; }
+  .oferta .foto { min-height: 170px; }
+  .oferta .carimbo { bottom: auto; top: 58px; left: 8px; }
+  .oferta .corpo { padding: 12px; gap: 5px; }
+  .oferta .nome { font-size: 16px; }
+  .oferta .ver { min-height: 44px; }
+  .oferta-amazon .compartilhar { top: 10px; right: 10px; bottom: auto; }
+  .oferta-amazon .loja { padding-right: 44px; min-height: 30px; }
+  .oferta-amazon .ver { padding-right: 9px; }
+  .oferta-amazon .nome { font-size: 18px; }
+  main { padding-bottom: calc(96px + env(safe-area-inset-bottom)); }
+  .cupom-valor { font-size: 25px; overflow-wrap: anywhere; }
 }

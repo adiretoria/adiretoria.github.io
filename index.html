@@ -14,7 +14,7 @@
 <link rel="apple-touch-icon" href="img/avatar-check.png">
 <link rel="preload" href="fontes/Anton-Regular.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="fontes/Archivo-VF.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="estilo.css?v=20261020d">
+<link rel="stylesheet" href="estilo.css?v=20261020e">
 </head>
 <body>
 <a class="pular" href="#pauta">Pular para as ofertas</a>
@@ -41,16 +41,6 @@
     <p class="resumo" id="resumo" aria-live="polite">Carregando as ofertas aprovadas…</p>
   </section>
 
-  <section class="parceiras" aria-labelledby="titulo-parceiras">
-    <h2 class="rotulo" id="titulo-parceiras">Lojas parceiras</h2>
-    <div class="parceiras-grade" id="parceiras"></div>
-  </section>
-
-  <section class="destaques" id="destaques" aria-labelledby="titulo-destaques" hidden>
-    <h2 class="rotulo" id="titulo-destaques">Maiores descontos de hoje</h2>
-    <ol class="destaques-lista" id="lista-destaques"></ol>
-  </section>
-
   <div class="abas" role="tablist" aria-label="O que ver">
     <button role="tab" id="aba-ofertas" aria-controls="painel-ofertas" aria-selected="true">Ofertas</button>
     <button role="tab" id="aba-cupons" aria-controls="painel-cupons" aria-selected="false" tabindex="-1">Cupons</button>
@@ -65,6 +55,14 @@
       <legend>Loja</legend>
       <div class="chips" id="chips-lojas"></div>
     </fieldset>
+    <div class="campo-produto" id="campo-categoria">
+      <label for="categoria">Categoria</label>
+      <select id="categoria"><option value="">Todas as categorias</option></select>
+    </div>
+    <div class="campo-produto" id="campo-faixa">
+      <label for="faixa">Faixa de preço</label>
+      <select id="faixa"><option value="">Todos os preços</option></select>
+    </div>
     <fieldset class="campo-ordem" id="campo-ordem">
       <legend>Ordenar</legend>
       <div class="ordens" id="ordens">
@@ -73,7 +71,21 @@
         <button type="button" data-ordem="menor">Menor preço</button>
       </div>
     </fieldset>
+    <label class="anteriores" id="campo-anteriores"><input type="checkbox" id="anteriores"> Ver ofertas anteriores (mais de 48 h)</label>
+    <div class="filtros-resumo">
+      <p id="contagem" role="status" aria-live="polite" aria-atomic="true"></p>
+      <div class="filtros-ativos" id="filtros-ativos" aria-label="Filtros ativos"></div>
+      <button type="button" id="limpar" class="limpar" hidden>Limpar filtros</button>
+    </div>
   </form>
+
+  <section class="destaques" id="destaques" aria-labelledby="titulo-destaques" hidden>
+    <h2 class="rotulo" id="titulo-destaques">Escolhas da Diretoria</h2>
+    <p class="destaques-criterio">Preços conferidos nas últimas 24 h, pelo menos 20% abaixo da referência da loja. Até seis produtos, com categorias variadas.</p>
+    <ol class="destaques-lista" id="lista-destaques"></ol>
+  </section>
+  <p class="erro" id="erro" role="alert" hidden>Não foi possível carregar as ofertas. <button type="button" id="tentar">Tentar novamente</button></p>
+  <noscript><p class="vazio">Ative o JavaScript para buscar as ofertas e conferir seus preços e condições.</p></noscript>
 
   <section id="painel-ofertas" role="tabpanel" aria-labelledby="aba-ofertas">
     <h2 class="vh">Ofertas</h2>
@@ -92,7 +104,8 @@
 <footer class="rodape">
   <div class="rodape-dentro">
     <img src="img/avatar-check.png" alt="" width="56" height="56">
-    <p><strong>Como funciona.</strong> Cada oferta aqui foi publicada nos grupos da Diretoria. O preço mostrado é o do momento da publicação: preço, estoque e cupom podem mudar na loja, então confira antes de comprar.</p>
+    <p><strong>Como funciona.</strong> Estas ofertas foram publicadas nos grupos da Diretoria. A data de publicação e a última conferência do preço aparecem em cada cartão. Preço, estoque e cupom podem mudar: confira o total na loja antes de comprar.</p>
+    <p><strong>O que significa “aprovada”.</strong> É uma oferta selecionada pela busca automática ou manualmente, conforme a origem informada. Descontos são comparados à referência da loja; não representam garantia de menor preço do mercado. Cupons sem elegibilidade confirmada aparecem como condição, sem desconto calculado. Preços sem conferência recente ficam identificados e fora dos destaques.</p>
     <p><strong>Links de afiliado.</strong> A Diretoria participa dos programas de afiliados da Amazon, Mercado Livre, Shopee e Magazine Luiza e pode receber comissão pelas compras feitas pelos links, sem custo extra para você.</p>
     <p class="declaracao-amazon" id="declaracao-amazon"></p>
     <p class="atualizado" id="atualizado"></p>
@@ -109,12 +122,16 @@
         <p class="loja"></p>
         <h3 class="nome"></h3>
         <p class="selo"></p>
+        <p class="preco-status"></p>
         <p class="precos"><span class="de"></span><span class="por"></span></p>
-        <p class="pix"></p>
+        <p class="preco-condicao"></p>
+        <p class="alternativas"></p>
+        <p class="cupom-aviso"></p>
         <p class="quando"></p>
         <span class="ver">Ver na loja</span>
       </div>
     </a>
+    <details class="condicoes"><summary>Condições e seleção</summary><ul></ul></details>
   </li>
 </template>
 
@@ -158,10 +175,11 @@
       <span class="destaque-pct"></span>
       <span class="destaque-nome"></span>
       <span class="destaque-preco"></span>
+      <span class="destaque-condicao"></span>
     </a>
   </li>
 </template>
 
-<script src="app.js?v=20261020d" type="module"></script>
+<script src="app.js?v=20261020e" type="module"></script>
 </body>
 </html>
