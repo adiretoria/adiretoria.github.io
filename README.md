@@ -6,7 +6,7 @@ estático (GitHub Pages, gratuito). O visitante busca o produto, filtra por loja
 
 ## Como os produtos chegam aqui
 
-O robô [radar-ofertas](https://github.com/paparidisbrancher/radar-ofertas) publica nos grupos. A cada
+O robô de ofertas (repositório privado) publica nos grupos. A cada
 15 minutos, `exportador/exportar.js` lê o banco do robô **só para leitura** e grava `dados/ofertas.json`.
 Se algo mudou, ele faz commit e push, e o GitHub Pages atualiza o site em 1 a 2 minutos.
 
