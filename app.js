@@ -29,7 +29,8 @@ function quando(iso) {
   return `Aprovada há ${dias} ${dias === 1 ? 'dia' : 'dias'} · o preço pode ter mudado`;
 }
 
-const estado = { aba: 'ofertas', q: '', loja: '', ordem: 'recentes', limite: POR_PAGINA };
+const estado = { aba: 'ofertas', q: '', loja: '', ordem: 'recentes', limite: POR_PAGINA, oferta: null };
+const SITE = 'https://adiretoria.github.io/';
 let dados = { ofertas: [], cupons: [], grupos: {} };
 
 // Estado na URL: dá para compartilhar uma busca ("?q=fone&loja=amazon").
@@ -37,7 +38,8 @@ function lerUrl() {
   const p = new URLSearchParams(location.search);
   estado.q = p.get('q') ?? '';
   estado.loja = LOJAS[p.get('loja')] ? p.get('loja') : '';
-  estado.ordem = ['recentes', 'desconto', 'menor', 'maior'].includes(p.get('ordem')) ? p.get('ordem') : 'recentes';
+  estado.ordem = ['recentes', 'desconto', 'menor'].includes(p.get('ordem')) ? p.get('ordem') : 'recentes';
+  estado.oferta = /^\d{1,9}$/.test(p.get('oferta') ?? '') ? Number(p.get('oferta')) : null;
   estado.aba = p.get('ver') === 'cupons' ? 'cupons' : 'ofertas';
 }
 function gravarUrl() {
@@ -46,6 +48,7 @@ function gravarUrl() {
   if (estado.loja) p.set('loja', estado.loja);
   if (estado.ordem !== 'recentes') p.set('ordem', estado.ordem);
   if (estado.aba === 'cupons') p.set('ver', 'cupons');
+  if (estado.oferta) p.set('oferta', estado.oferta);
   history.replaceState(null, '', `${location.pathname}${p.size ? `?${p}` : ''}`);
 }
 
@@ -54,10 +57,24 @@ const filtrarOfertas = () => {
   const lista = dados.ofertas.filter((o) => (!estado.loja || o.loja === estado.loja) && casa(`${o.nome} ${LOJAS[o.loja]}`));
   // Amazon não tem preço no site (só a loja pode exibir): vai para o fim quando a ordem é por preço.
   const p = (o, semPreco) => o.preco ?? semPreco;
-  const ordem = { desconto: (a, b) => desconto(b) - desconto(a), menor: (a, b) => p(a, Infinity) - p(b, Infinity), maior: (a, b) => p(b, -1) - p(a, -1) }[estado.ordem];
-  return ordem ? lista.sort(ordem) : lista;
+  const ordem = { desconto: (a, b) => desconto(b) - desconto(a), menor: (a, b) => p(a, Infinity) - p(b, Infinity) }[estado.ordem];
+  if (ordem) lista.sort(ordem);
+  // Oferta compartilhada (?oferta=ID) vai para o topo da lista.
+  const i = lista.findIndex((o) => o.id === estado.oferta);
+  if (i > 0) lista.unshift(...lista.splice(i, 1));
+  return lista;
 };
 const filtrarCupons = () => dados.cupons.filter((c) => (!estado.loja || c.loja === estado.loja) && casa(`${c.titulo} ${c.detalhe ?? ''} ${LOJAS[c.loja]}`));
+
+// Compartilhar no WhatsApp: leva para a oferta no nosso site (nunca o link da loja direto, e sem preço da Amazon).
+function ligarCompartilhar(el, o) {
+  const preco = o.loja !== 'amazon' && o.preco ? ` por ${reais(o.preco)}` : '';
+  const texto = `${o.nome}${preco} — aprovado pela Diretoria ✅\n${SITE}?oferta=${o.id}`;
+  const a = el.querySelector('.compartilhar');
+  a.href = `https://wa.me/?text=${encodeURIComponent(texto)}`;
+  a.setAttribute('aria-label', `Compartilhar ${o.nome} no WhatsApp`);
+  if (o.id === estado.oferta) el.classList.add('compartilhada');
+}
 
 // Amazon: só nome e link direto com a tag. Preço, imagem e selos só poderiam vir da API da Amazon.
 function cartaoAmazon(o) {
@@ -68,6 +85,7 @@ function cartaoAmazon(o) {
   el.querySelector('.nome').textContent = o.nome;
   el.querySelector('.quando').textContent = quando(o.em).replace(' · o preço pode ter mudado', '');
   el.querySelector('.declaracao').textContent = DECLARACAO_AMAZON;
+  ligarCompartilhar(el, o);
   return el;
 }
 
@@ -93,6 +111,7 @@ function cartaoOferta(o) {
   const q = el.querySelector('.quando');
   q.textContent = quando(o.em);
   if (Date.now() - Date.parse(o.em) > 86400000) q.classList.add('antiga');
+  ligarCompartilhar(el, o);
   return el;
 }
 
@@ -130,7 +149,10 @@ function blocosParceiras() {
       : Object.assign(document.createElement('span'), { className: 'parceira-nome', textContent: LOJAS[l] });
     const qt = document.createElement('span');
     qt.className = 'parceira-qt';
-    qt.textContent = `${n} ${estado.aba === 'cupons' ? (n === 1 ? 'cupom' : 'cupons') : (n === 1 ? 'oferta' : 'ofertas')}`;
+    // "até X% OFF": maior desconto real entre as ofertas da loja (Amazon não tem preço no site, então não tem).
+    const maxPct = estado.aba === 'cupons' ? 0 : Math.max(0, ...base.filter((x) => x.loja === l).map(desconto));
+    const contagem = `${n} ${estado.aba === 'cupons' ? (n === 1 ? 'cupom' : 'cupons') : (n === 1 ? 'oferta' : 'ofertas')}`;
+    qt.replaceChildren(...(maxPct >= 10 ? [Object.assign(document.createElement('b'), { textContent: `até ${maxPct}% OFF` }), ' '] : []), contagem);
     b.append(nome, qt);
     b.addEventListener('click', () => {
       estado.loja = estado.loja === l ? '' : l;
@@ -139,6 +161,27 @@ function blocosParceiras() {
       $(estado.aba === 'cupons' ? 'painel-cupons' : 'painel-ofertas').scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' });
     });
     return b;
+  }));
+}
+
+// Faixa "Maiores descontos de hoje": as 10 ofertas das últimas 24 h com mais desconto (só sem busca/filtro).
+function faixaDestaques() {
+  const mostrar = estado.aba === 'ofertas' && !estado.q && !estado.loja;
+  const lista = dados.ofertas.filter((o) => o.loja !== 'amazon' && desconto(o) >= 20 && Date.now() - Date.parse(o.em) < 86400000)
+    .sort((a, b) => desconto(b) - desconto(a)).slice(0, 10);
+  $('destaques').hidden = !mostrar || lista.length < 3;
+  if ($('destaques').hidden) return;
+  $('lista-destaques').replaceChildren(...lista.map((o) => {
+    const el = $('modelo-destaque').content.firstElementChild.cloneNode(true);
+    const a = el.querySelector('a');
+    a.href = o.link;
+    a.setAttribute('aria-label', `${o.nome}, ${desconto(o)}% de desconto, ${reais(o.preco)} na ${LOJAS[o.loja]}`);
+    const img = el.querySelector('img');
+    if (o.img) img.src = o.img; else img.remove();
+    el.querySelector('.destaque-pct').textContent = `−${desconto(o)}%`;
+    el.querySelector('.destaque-nome').textContent = o.nome;
+    el.querySelector('.destaque-preco').textContent = reais(o.preco);
+    return el;
   }));
 }
 
@@ -171,6 +214,8 @@ function render() {
   $('campo-ordem').hidden = cupons;
   chipsLojas();
   blocosParceiras();
+  faixaDestaques();
+  for (const b of $('ordens').children) b.setAttribute('aria-pressed', String(b.dataset.ordem === estado.ordem));
   const filtro = estado.q || estado.loja ? ' Limpe a busca ou escolha outra loja.' : '';
   if (cupons) {
     const lista = filtrarCupons();
@@ -185,7 +230,9 @@ function render() {
     $('vazio-ofertas').textContent = `Nenhuma oferta com esse filtro.${filtro}`;
     $('mais-ofertas').hidden = lista.length <= estado.limite;
     const hoje = dados.ofertas.filter((o) => Date.now() - Date.parse(o.em) < 86400000).length;
-    $('resumo').textContent = estado.q || estado.loja
+    const procurada = estado.oferta && !dados.ofertas.some((o) => o.id === estado.oferta);
+    $('resumo').textContent = procurada ? 'A oferta compartilhada já saiu da pauta (fica 7 dias). Veja as aprovadas agora.'
+      : estado.q || estado.loja
       ? `${lista.length} ${lista.length === 1 ? 'oferta encontrada' : 'ofertas encontradas'} entre as aprovadas na última semana.`
       : `${hoje} ofertas aprovadas nas últimas 24 horas, ${dados.ofertas.length} na semana. Toque na oferta para ir à loja.`;
   }
@@ -205,10 +252,10 @@ async function iniciar() {
   lerUrl();
   $('data-ata').textContent = `Ata da reunião · ${new Date().toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo', day: 'numeric', month: 'long' })}`;
   $('busca').value = estado.q;
-  $('ordem').value = estado.ordem;
+
   let t;
   $('busca').addEventListener('input', () => { clearTimeout(t); t = setTimeout(() => { estado.q = $('busca').value.trim(); estado.limite = POR_PAGINA; render(); }, 180); });
-  $('ordem').addEventListener('change', () => { estado.ordem = $('ordem').value; render(); });
+  for (const b of $('ordens').children) b.addEventListener('click', () => { estado.ordem = b.dataset.ordem; estado.limite = POR_PAGINA; render(); });
   $('filtros').addEventListener('submit', (e) => e.preventDefault());
   $('mais-ofertas').addEventListener('click', () => { estado.limite += POR_PAGINA; render(); });
   ligarAbas();
@@ -223,11 +270,19 @@ async function iniciar() {
     };
     for (const [canal, url] of Object.entries(dados.grupos)) {
       const a = $(`grupo-${canal}`);
-      if (a && /^https:\/\/(chat\.whatsapp\.com|whatsapp\.com|t\.me)\//.test(url)) { a.href = url; a.hidden = false; }
+      if (a && /^https:\/\/(chat\.whatsapp\.com|whatsapp\.com|t\.me)\//.test(url)) {
+        for (const x of [a, $(`barra-${canal}`)]) { x.href = url; x.hidden = false; }
+      }
+    }
+    // Celular: quando os botões do topo saem da tela, aparece a barra fixa "Entrar no grupo".
+    const topo = document.querySelector('.grupos');
+    if (Object.keys(dados.grupos).length && 'IntersectionObserver' in window) {
+      new IntersectionObserver(([e]) => { $('barra-grupos').hidden = e.isIntersecting; }).observe(topo);
     }
     if (j.amazon) $('declaracao-amazon').textContent = DECLARACAO_AMAZON;
     if (j.geradoEm) $('atualizado').textContent = `Lista atualizada em ${new Date(j.geradoEm).toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo', dateStyle: 'short', timeStyle: 'short' })}.`;
     render();
+    if (estado.oferta) document.querySelector('.compartilhada')?.scrollIntoView({ block: 'center' });
   } catch {
     $('resumo').textContent = 'Não foi possível carregar as ofertas agora. Recarregue a página em alguns instantes.';
   }
