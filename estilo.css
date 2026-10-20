@@ -1,142 +1,157 @@
-@font-face { font-family: Manrope; src: url(fontes/Manrope-VF.ttf) format('truetype'); font-weight: 200 800; font-display: swap; }
-@font-face { font-family: 'JetBrains Mono'; src: url(fontes/JetBrainsMono-VF.ttf) format('truetype'); font-weight: 100 800; font-display: swap; }
+@font-face { font-family: Anton; src: url(fontes/Anton-Regular.woff2) format('woff2'); font-weight: 400; font-display: swap; }
+@font-face { font-family: Archivo; src: url(fontes/Archivo-VF.woff2) format('woff2'); font-weight: 100 900; font-stretch: 62% 125%; font-display: swap; }
 
-/* Identidade "A Diretoria": navy, papel e o vermelho do carimbo (só para aprovação e desconto). */
+/* Material da marca A Diretoria: azul, papel, lima (aprovação) e coral (margem da ata). */
 :root {
-  --navy: #0B1F3A; --navy-2: #16304F; --papel: #F6F3EA; --branco: #FFFFFF; --linha: #DDD6C3;
-  --cinza: #5E6573; --vermelho: #C62828; --vermelho-f: #FBEDEC; --verde: #1F6B45;
-  --raio: 14px;
+  --azul: #101B2D; --azul-2: #16223A; --papel: #F5F2E9; --linha: #E6E1D3; --branco: #FFFFFF;
+  --lima: #D7FF3F; --coral: #FF654D; --coral-claro: #FB9E8B; --cinza: #565F70; --alerta: #A83A24;
+  --display: Anton, Impact, 'Arial Narrow', sans-serif;
+  --texto: Archivo, system-ui, sans-serif;
 }
 * { box-sizing: border-box; }
 html { -webkit-text-size-adjust: 100%; }
-body { margin: 0; background: var(--papel); color: var(--navy); font: 16px/1.5 Manrope, system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+body { margin: 0; background: var(--papel); color: var(--azul); font: 16px/1.5 var(--texto); -webkit-font-smoothing: antialiased; }
 a { color: inherit; }
 img { display: block; max-width: 100%; }
-:focus-visible { outline: 3px solid var(--vermelho); outline-offset: 2px; }
+:focus-visible { outline: 3px solid var(--coral); outline-offset: 2px; }
 .vh { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
-.pular { position: absolute; left: -9999px; top: 8px; z-index: 10; background: var(--branco); padding: 10px 16px; border-radius: 8px; }
+.pular { position: absolute; left: -9999px; top: 8px; z-index: 10; background: var(--lima); color: var(--azul); padding: 10px 16px; font-weight: 700; }
 .pular:focus { left: 8px; }
+/* Rótulo da marca: caixa alta larga e espaçada ("ATA DA REUNIÃO", "OFERTAS APROVADAS EM ATA"). */
+.rotulo { font-stretch: 125%; font-weight: 600; font-size: 12px; letter-spacing: .28em; text-transform: uppercase; }
 
 /* Topo */
-.topo { background: var(--navy); color: var(--papel); }
-.topo-dentro { max-width: 1200px; margin: 0 auto; padding: 22px 24px; display: flex; gap: 20px; align-items: center; justify-content: space-between; flex-wrap: wrap; }
-.marca { text-decoration: none; display: flex; flex-direction: column; gap: 2px; }
-.marca-nome { font-weight: 800; font-size: 28px; letter-spacing: -.01em; line-height: 1; }
-.marca-sub { color: #A9B3C2; font-size: 13px; letter-spacing: .14em; text-transform: uppercase; display: flex; align-items: center; gap: 10px; }
-.marca-sub::before { content: ''; width: 22px; height: 2px; background: var(--vermelho); }
+.topo { background: var(--azul); color: var(--papel); }
+.topo-dentro { max-width: 1200px; margin: 0 auto; padding: 20px 24px; display: flex; gap: 20px; align-items: center; justify-content: space-between; flex-wrap: wrap; }
+.marca { text-decoration: none; display: flex; flex-direction: column; gap: 8px; }
+.marca img { height: 36px; width: auto; }
+.marca .rotulo { font-size: 10.5px; color: #C9CED8; }
 .grupos { display: flex; gap: 10px; flex-wrap: wrap; }
-.grupo { display: inline-flex; align-items: center; gap: 0; min-height: 44px; padding: 10px 18px; border-radius: 999px; font-weight: 700; font-size: 15px; text-decoration: none; }
-.grupo::before { content: ''; margin-right: 8px; width: 9px; height: 9px; border-radius: 50%; background: currentColor; }
-.grupo-wa { background: var(--papel); color: var(--navy); }
-.grupo-tg { border: 1.5px solid #8E9AAC; color: var(--papel); }
-.grupo:hover { filter: brightness(1.06); }
+.grupo { display: inline-flex; align-items: center; min-height: 46px; padding: 10px 20px; font-weight: 700; font-size: 15px; text-decoration: none; border-radius: 4px; }
+.grupo-wa { background: var(--lima); color: var(--azul); }
+.grupo-tg { border: 1.5px solid var(--papel); color: var(--papel); }
+.grupo:hover { filter: brightness(1.08); }
 .grupo[hidden] { display: none; }
 
-main { max-width: 1200px; margin: 0 auto; padding: 0 24px 64px; }
+main { max-width: 1200px; margin: 0 auto; padding: 0 24px 72px; }
 main:focus { outline: none; }
 
-/* Abertura: a ata da sessão */
-.abertura { padding: 44px 0 26px; border-bottom: 1.5px solid var(--navy); }
-.saudacao { margin: 0 0 6px; color: var(--vermelho); font-weight: 700; font-size: 14px; letter-spacing: .2em; text-transform: uppercase; }
-h1 { margin: 0; font-weight: 800; font-size: clamp(40px, 7vw, 76px); line-height: 1; letter-spacing: -.035em; }
-.resumo { margin: 14px 0 0; font-size: 18px; color: var(--navy-2); max-width: 62ch; }
+/* Abertura: folha de ata pautada com a margem coral */
+.abertura { position: relative; margin: 0 -24px; padding: 40px 24px 28px 64px; border-bottom: 2px solid var(--azul);
+  background: linear-gradient(90deg, transparent 30px, var(--coral-claro) 30px, var(--coral-claro) 36px, transparent 36px),
+    repeating-linear-gradient(180deg, transparent 0 47px, var(--linha) 47px 49px); }
+.abertura .rotulo { margin: 0; }
+.titulo-linha { display: flex; align-items: center; gap: 22px; flex-wrap: wrap; margin: 6px 0 0; }
+h1 { margin: 0; font-family: var(--display); font-weight: 400; font-size: clamp(54px, 9vw, 112px); line-height: .95; letter-spacing: -.005em; text-transform: uppercase; }
+.carimbo-titulo { display: inline-block; transform: rotate(-6deg); background: var(--lima); color: var(--azul); padding: 6px; }
+.carimbo-titulo svg { width: .8em; height: .8em; margin-left: .25em; vertical-align: -.05em; }
+.carimbo-titulo span { display: block; border: 3px solid var(--azul); padding: 4px 16px 2px; font-family: var(--display); font-size: clamp(22px, 3.2vw, 34px); line-height: 1.1; text-transform: uppercase; }
+.resumo { margin: 16px 0 0; font-size: 18px; max-width: 60ch; }
 
 /* Abas */
-.abas { display: flex; gap: 4px; margin: 22px 0 0; }
-.abas button { font: inherit; font-weight: 700; font-size: 16px; color: var(--cinza); background: none; border: 0; border-bottom: 3px solid transparent; padding: 10px 14px; cursor: pointer; min-height: 44px; }
-.abas button[aria-selected='true'] { color: var(--navy); border-bottom-color: var(--vermelho); }
+.abas { display: flex; gap: 6px; margin: 24px 0 0; }
+.abas button { font: inherit; font-stretch: 125%; font-weight: 700; font-size: 13px; letter-spacing: .2em; text-transform: uppercase; color: var(--cinza); background: none; border: 0; padding: 10px 14px; cursor: pointer; min-height: 46px; box-shadow: inset 0 -4px 0 transparent; }
+.abas button[aria-selected='true'] { color: var(--azul); box-shadow: inset 0 -4px 0 var(--azul); }
 
 /* Filtros */
-.filtros { display: grid; grid-template-columns: minmax(220px, 1.4fr) auto minmax(170px, .5fr); gap: 16px 22px; align-items: end; padding: 18px 0 26px; }
+.filtros { display: grid; grid-template-columns: minmax(220px, 1.4fr) auto minmax(170px, .5fr); gap: 16px 22px; align-items: end; padding: 18px 0 28px; }
 .filtros label, .filtros legend { display: block; font-size: 13px; font-weight: 700; margin-bottom: 7px; padding: 0; }
 .filtros fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
-input, select { width: 100%; font: inherit; color: var(--navy); background: var(--branco); border: 1.5px solid var(--linha); border-radius: 10px; padding: 11px 14px; min-height: 46px; }
-input:focus, select:focus { border-color: var(--navy); outline: none; box-shadow: 0 0 0 3px rgba(198, 40, 40, .2); }
+input, select { width: 100%; font: inherit; color: var(--azul); background: var(--branco); border: 2px solid var(--azul); border-radius: 4px; padding: 10px 14px; min-height: 48px; }
+input:focus, select:focus { outline: none; box-shadow: 0 0 0 4px var(--lima); }
 .chips { display: flex; gap: 6px; flex-wrap: wrap; }
-.chip { font: inherit; font-size: 14px; font-weight: 600; color: var(--navy); background: var(--branco); border: 1.5px solid var(--linha); border-radius: 999px; padding: 8px 14px; min-height: 40px; cursor: pointer; white-space: nowrap; }
-.chip[aria-pressed='true'] { background: var(--navy); border-color: var(--navy); color: var(--papel); }
-.chip small { font-family: 'JetBrains Mono', monospace; font-size: 11px; opacity: .7; margin-left: 4px; }
+.chip { font: inherit; font-size: 14px; font-weight: 700; color: var(--azul); background: var(--branco); border: 2px solid var(--azul); border-radius: 4px; padding: 7px 14px; min-height: 44px; cursor: pointer; white-space: nowrap; }
+.chip[aria-pressed='true'] { background: var(--azul); color: var(--lima); }
+.chip small { font-size: 12px; font-weight: 500; opacity: .75; margin-left: 5px; }
 
 /* Ofertas */
-.grade { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(232px, 1fr)); gap: 18px; }
-.oferta-link { position: relative; display: flex; flex-direction: column; height: 100%; text-decoration: none; background: var(--branco); border: 1px solid var(--linha); border-radius: var(--raio); overflow: hidden; }
-.oferta-link:hover .ver { background: var(--vermelho); }
-.oferta-link:hover .nome { text-decoration: underline; text-decoration-thickness: 1.5px; text-underline-offset: 3px; }
-.foto { aspect-ratio: 1; background: var(--branco); padding: 16px; display: grid; place-items: center; border-bottom: 1px solid #EFEBE0; }
-.foto img { width: 100%; height: 100%; object-fit: contain; }
-.foto.sem-foto { background: repeating-linear-gradient(135deg, #F3EFE4 0 8px, #ECE6D7 8px 16px); }
-/* O carimbo do kit: aprovado + desconto. É o único elemento vermelho do card. */
-.carimbo { position: absolute; top: 14px; right: 12px; transform: rotate(-7deg); display: flex; flex-direction: column; align-items: center; padding: 5px 9px 4px; color: var(--vermelho); border: 2px solid var(--vermelho); outline: 1px solid var(--vermelho); outline-offset: 2px; border-radius: 3px; background: rgba(255, 255, 255, .92); line-height: 1; }
-.carimbo-topo { font-size: 9.5px; font-weight: 800; letter-spacing: .18em; text-transform: uppercase; }
-.carimbo-pct { font-family: 'JetBrains Mono', monospace; font-weight: 800; font-size: 20px; margin-top: 3px; letter-spacing: -.02em; }
+.grade { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(236px, 1fr)); gap: 20px; }
+.oferta-link { position: relative; display: flex; flex-direction: column; height: 100%; text-decoration: none; background: var(--branco); border: 2px solid var(--azul); }
+.oferta-link:hover .ver { background: var(--lima); color: var(--azul); }
+.oferta-link:hover .nome { text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 3px; }
+.foto { position: relative; aspect-ratio: 1; overflow: hidden; background: var(--branco); border-bottom: 2px solid var(--azul); }
+.foto img { position: absolute; inset: 18px; width: calc(100% - 36px); height: calc(100% - 36px); object-fit: contain; }
+.foto.sem-foto { background: repeating-linear-gradient(135deg, #ECE6D8 0 14px, #E3DCCB 14px 28px); }
+/* Carimbo "APROVADO ✓" do material da marca, com o desconto: o elemento que marca cada oferta. */
+.carimbo { position: absolute; top: 12px; right: -8px; transform: rotate(-7deg); background: var(--lima); color: var(--azul); padding: 4px; box-shadow: 0 2px 0 rgba(16, 27, 45, .25); }
+.carimbo-dentro { display: flex; align-items: baseline; gap: 6px; border: 2px solid var(--azul); padding: 3px 9px 1px; font-family: var(--display); text-transform: uppercase; line-height: 1.05; }
+.carimbo-topo { font-size: 13px; letter-spacing: .02em; }
+.carimbo-pct { font-size: 24px; }
 .carimbo[hidden] { display: none; }
 .corpo { display: flex; flex-direction: column; gap: 6px; padding: 14px 16px 16px; flex: 1; }
-.loja { margin: 0; font-size: 13px; font-weight: 700; color: var(--cinza); }
-.nome { margin: 0; font-size: 15.5px; font-weight: 600; line-height: 1.35; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
-.selo { margin: 0; font-size: 12.5px; font-weight: 600; color: var(--verde); }
+.loja { margin: 0; font-stretch: 125%; font-weight: 700; font-size: 10.5px; letter-spacing: .2em; text-transform: uppercase; color: var(--cinza); }
+.nome { margin: 0; font-stretch: 82%; font-weight: 700; font-size: 18px; line-height: 1.2; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.selo { margin: 0; font-size: 13px; font-weight: 600; color: var(--azul); background: var(--papel); padding: 3px 7px; align-self: flex-start; }
 .selo:empty, .pix:empty { display: none; }
-.precos { margin: 6px 0 0; display: flex; flex-direction: column; font-family: 'JetBrains Mono', monospace; }
-.de { font-size: 13px; color: var(--cinza); text-decoration: line-through; }
+.precos { margin: 8px 0 0; display: flex; flex-direction: column; }
+.de { font-size: 14px; color: var(--cinza); text-decoration: line-through; }
 .de:empty { display: none; }
-.por { font-size: 24px; font-weight: 700; letter-spacing: -.03em; }
-.pix { margin: 0; font-size: 13px; color: var(--navy-2); }
-.quando { margin: auto 0 0; padding-top: 8px; font-size: 12.5px; color: var(--cinza); }
-.quando.antiga { color: #8A4B00; }
-.ver { margin-top: 10px; display: block; text-align: center; font-weight: 700; font-size: 15px; color: var(--papel); background: var(--navy); border-radius: 10px; padding: 11px; }
+.por { font-family: var(--display); font-size: 34px; line-height: 1; letter-spacing: .005em; }
+.pix { margin: 0; font-size: 13.5px; font-weight: 600; }
+.quando { margin: auto 0 0; padding-top: 10px; font-size: 13px; color: var(--cinza); }
+.quando.antiga { color: var(--alerta); }
+.ver { margin-top: 10px; display: block; text-align: center; font-weight: 700; font-size: 15px; color: var(--papel); background: var(--azul); padding: 12px; }
 
-/* Amazon: sem foto nem preço (regra do Programa de Associados); o card se apoia no nome e no botão. */
-.oferta-amazon .oferta-link { border-top: 4px solid var(--navy); }
+/* Amazon: sem foto nem preço (regra do Programa de Associados). */
+.oferta-amazon .oferta-link { border-top-width: 8px; }
 .oferta-amazon .corpo { padding-top: 18px; }
-.oferta-amazon .nome { font-size: 17px; -webkit-line-clamp: 5; }
-.amazon-aviso { margin: 4px 0 0; font-size: 14px; color: var(--navy-2); }
-.declaracao { margin: 10px 0 0; font-size: 11.5px; line-height: 1.4; color: var(--cinza); }
+.oferta-amazon .nome { font-size: 20px; -webkit-line-clamp: 5; }
+.amazon-aviso { margin: 6px 0 0; font-size: 14px; }
+.declaracao { margin: 12px 0 0; font-size: 12px; line-height: 1.4; color: var(--cinza); }
 .declaracao-amazon:empty { display: none; }
 .declaracao-amazon { color: var(--papel); font-weight: 600; }
 
-/* Cupons */
-.cupons { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 14px; }
-.cupom { display: grid; grid-template-columns: 112px minmax(0, 1fr); background: var(--branco); border: 1px solid var(--linha); border-radius: var(--raio); overflow: hidden; }
-.cupom-valor { grid-row: span 2; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 4px; text-align: center; padding: 14px 8px; border-right: 2px dashed var(--linha); font-family: 'JetBrains Mono', monospace; font-weight: 800; font-size: 24px; color: var(--vermelho); line-height: 1.1; letter-spacing: -.04em; }
-.cupom-valor small { display: block; font-family: Manrope, sans-serif; font-size: 11px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
+/* Cupons: valor numa faixa lima, como o carimbo */
+.cupons { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 16px; }
+.cupom { display: grid; grid-template-columns: 116px minmax(0, 1fr); background: var(--branco); border: 2px solid var(--azul); }
+.cupom-valor { grid-row: span 2; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 4px; text-align: center; padding: 14px 8px; background: var(--lima); border-right: 2px dashed var(--azul); font-family: var(--display); font-size: 32px; line-height: 1; }
+.cupom-valor small { font-family: var(--texto); font-stretch: 125%; font-size: 9.5px; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; }
 .cupom-corpo { padding: 14px 16px 6px; min-width: 0; }
-.cupom-titulo { margin: 2px 0 4px; font-size: 16px; font-weight: 700; line-height: 1.3; overflow-wrap: anywhere; }
-.cupom-regras { margin: 0; font-size: 13px; color: var(--cinza); }
-.cupom-link { margin: 6px 16px 14px; justify-self: start; font-weight: 700; font-size: 14px; color: var(--papel); background: var(--navy); border-radius: 10px; padding: 9px 16px; text-decoration: none; }
-.cupom-link:hover { background: var(--vermelho); }
+.cupom-titulo { margin: 6px 0 4px; font-stretch: 82%; font-size: 19px; font-weight: 700; line-height: 1.2; overflow-wrap: anywhere; }
+.cupom-regras { margin: 0; font-size: 13.5px; color: var(--cinza); }
+.cupom-link { margin: 6px 16px 14px; justify-self: start; font-weight: 700; font-size: 14px; color: var(--papel); background: var(--azul); padding: 10px 18px; text-decoration: none; }
+.cupom-link:hover { background: var(--lima); color: var(--azul); }
 
-.vazio { margin: 24px 0; padding: 22px; background: var(--branco); border: 1.5px dashed var(--linha); border-radius: var(--raio); color: var(--navy-2); }
-.mais { text-align: center; margin-top: 28px; }
-.mais button { font: inherit; font-weight: 700; color: var(--navy); background: transparent; border: 1.5px solid var(--navy); border-radius: 999px; padding: 12px 26px; min-height: 46px; cursor: pointer; }
-.mais button:hover { background: var(--navy); color: var(--papel); }
+.vazio { margin: 24px 0; padding: 22px; background: var(--branco); border: 2px dashed var(--azul); }
+.mais { text-align: center; margin-top: 32px; }
+.mais button { font: inherit; font-weight: 700; color: var(--azul); background: var(--lima); border: 2px solid var(--azul); padding: 12px 28px; min-height: 48px; cursor: pointer; }
+.mais button:hover { background: var(--azul); color: var(--lima); }
 
-.rodape { background: var(--navy); color: #C8D0DB; }
-.rodape-dentro { max-width: 1200px; margin: 0 auto; padding: 32px 24px 40px; display: grid; gap: 10px; font-size: 14px; }
-.rodape p { margin: 0; max-width: 80ch; }
-.rodape strong { color: var(--papel); }
-.atualizado { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #8E9AAC; }
+/* Rodapé */
+.rodape { background: var(--azul); color: #C9CED8; }
+.rodape-dentro { max-width: 1200px; margin: 0 auto; padding: 36px 24px 44px; display: grid; grid-template-columns: 56px minmax(0, 1fr); gap: 6px 22px; font-size: 14px; }
+.rodape-dentro > img { grid-row: span 6; width: 56px; height: 56px; }
+.rodape p { margin: 0 0 6px; max-width: 80ch; }
+.rodape strong { color: var(--lima); }
+.atualizado { font-size: 12.5px; color: #9AA3B2; }
 
 @media (max-width: 760px) {
-  .topo-dentro { padding: 16px; }
-  .marca-nome { font-size: 24px; }
+  .topo-dentro { padding: 16px; gap: 14px; }
+  .marca img { height: 28px; }
   .grupos { width: 100%; }
   .grupo { flex: 1; justify-content: center; font-size: 14px; padding: 10px 12px; white-space: nowrap; }
   .grupo .longo { display: none; }
-  h1 { font-size: 38px; }
+  main { padding: 0 16px 52px; }
+  .abertura { margin: 0 -16px; padding: 28px 16px 22px 44px;
+    background: linear-gradient(90deg, transparent 20px, var(--coral-claro) 20px, var(--coral-claro) 25px, transparent 25px),
+      repeating-linear-gradient(180deg, transparent 0 39px, var(--linha) 39px 41px); }
+  .titulo-linha { gap: 12px; }
   .resumo { font-size: 16px; }
-  main { padding: 0 16px 48px; }
-  .abertura { padding: 30px 0 20px; }
   .filtros { grid-template-columns: minmax(0, 1fr); }
   .chips { flex-wrap: nowrap; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none; }
-  .grade { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
-  .foto { padding: 10px; }
-  .corpo { padding: 10px 11px 12px; }
-  .nome { font-size: 14px; }
-  .por { font-size: 20px; }
-  .carimbo { top: 8px; right: 6px; padding: 4px 6px 3px; }
-  .carimbo-pct { font-size: 16px; }
+  .grade { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  .foto img { inset: 10px; width: calc(100% - 20px); height: calc(100% - 20px); }
+  .corpo { padding: 10px 10px 12px; }
+  .nome { font-size: 15.5px; }
+  .por { font-size: 26px; }
+  .carimbo { top: 8px; right: -6px; }
+  .carimbo-topo { display: none; }
+  .carimbo-pct { font-size: 19px; }
   .cupons { grid-template-columns: minmax(0, 1fr); }
-  .cupom { grid-template-columns: 92px minmax(0, 1fr); }
+  .cupom { grid-template-columns: 96px minmax(0, 1fr); }
+  .rodape-dentro { grid-template-columns: minmax(0, 1fr); }
+  .rodape-dentro > img { grid-row: auto; width: 44px; height: 44px; }
 }
 @media (prefers-reduced-motion: no-preference) {
-  .oferta-link, .ver, .cupom-link, .chip { transition: background-color .15s, color .15s, border-color .15s; }
+  .ver, .cupom-link, .chip, .mais button { transition: background-color .15s, color .15s; }
 }

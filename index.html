@@ -7,11 +7,13 @@
 <meta name="description" content="As ofertas que A Diretoria publicou nos grupos de WhatsApp e Telegram: busque, filtre por loja e vá direto ao produto.">
 <meta property="og:title" content="A Diretoria — ofertas aprovadas em ata">
 <meta property="og:description" content="Ofertas da Amazon, Mercado Livre, Shopee e Magalu aprovadas pela Diretoria.">
-<meta property="og:image" content="img/a-diretoria-capa.png">
-<meta name="theme-color" content="#0B1F3A">
+<meta property="og:image" content="https://adiretoria.github.io/img/capa.png">
+<meta name="theme-color" content="#101B2D">
 <meta name="referrer" content="strict-origin-when-cross-origin">
-<link rel="icon" href="img/a-diretoria-foto-perfil.png">
-<link rel="preload" href="fontes/Manrope-VF.ttf" as="font" type="font/ttf" crossorigin>
+<link rel="icon" href="img/avatar-check.png">
+<link rel="apple-touch-icon" href="img/avatar-check.png">
+<link rel="preload" href="fontes/Anton-Regular.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fontes/Archivo-VF.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="estilo.css">
 </head>
 <body>
@@ -19,8 +21,8 @@
 <header class="topo">
   <div class="topo-dentro">
     <a class="marca" href="./" aria-label="A Diretoria, início">
-      <span class="marca-nome">A DIRETORIA</span>
-      <span class="marca-sub">Ofertas aprovadas em ata</span>
+      <img src="img/wordmark-azul.png" alt="A Diretoria" width="1256" height="264">
+      <span class="rotulo">Ofertas aprovadas em ata</span>
     </a>
     <nav class="grupos" aria-label="Entrar nos grupos">
       <a class="grupo grupo-wa" id="grupo-whatsapp" hidden rel="noopener" target="_blank">WhatsApp<span class="longo">: entrar no grupo</span></a>
@@ -31,8 +33,11 @@
 
 <main id="pauta" tabindex="-1">
   <section class="abertura" aria-labelledby="titulo">
-    <p class="saudacao">Prezado conselheiro,</p>
-    <h1 id="titulo">Pauta de hoje</h1>
+    <p class="rotulo" id="data-ata">Ata da reunião</p>
+    <div class="titulo-linha">
+      <h1 id="titulo">Pauta do dia</h1>
+      <div class="carimbo-titulo" aria-hidden="true"><span>Aprovado<svg viewBox="0 0 24 24"><path d="M2 13.5l3.6-3.2 4.3 4.9L18.6 3 22.4 6 10.2 21z" fill="currentColor"/></svg></span></div>
+    </div>
     <p class="resumo" id="resumo" aria-live="polite">Carregando as ofertas aprovadas…</p>
   </section>
 
@@ -77,6 +82,7 @@
 
 <footer class="rodape">
   <div class="rodape-dentro">
+    <img src="img/avatar-check.png" alt="" width="56" height="56">
     <p><strong>Como funciona.</strong> Cada oferta aqui foi publicada nos grupos da Diretoria. O preço mostrado é o do momento da publicação: preço, estoque e cupom podem mudar na loja, então confira antes de comprar.</p>
     <p><strong>Links de afiliado.</strong> A Diretoria participa dos programas de afiliados da Amazon, Mercado Livre, Shopee e Magazine Luiza e pode receber comissão pelas compras feitas pelos links, sem custo extra para você.</p>
     <p class="declaracao-amazon" id="declaracao-amazon"></p>
@@ -88,7 +94,7 @@
   <li class="oferta">
     <a class="oferta-link" rel="sponsored nofollow noopener" target="_blank">
       <div class="foto"><img alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer"></div>
-      <div class="carimbo" aria-hidden="true"><span class="carimbo-topo">Aprovado</span><span class="carimbo-pct"></span></div>
+      <div class="carimbo" aria-hidden="true"><div class="carimbo-dentro"><span class="carimbo-topo">Aprovado</span><span class="carimbo-pct"></span></div></div>
       <div class="corpo">
         <p class="loja"></p>
         <h3 class="nome"></h3>

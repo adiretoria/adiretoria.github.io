@@ -56,4 +56,4 @@ Passo a passo para pedir de novo: [docs/amazon-associados.md](docs/amazon-associ
   Magalu), sem porta nem credenciais. Os textos entram na página como texto, nunca como HTML.
 - Nenhum segredo vai para este repositório. O JSON tem só dados públicos das ofertas e links de afiliado.
 
-Fontes Manrope e JetBrains Mono sob SIL OFL (`fontes/`).
+Fontes Anton e Archivo sob SIL OFL (`fontes/`, só os caracteres usados em português). Logo, avatar e capa do material da marca (`img/`).

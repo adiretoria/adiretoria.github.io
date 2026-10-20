@@ -166,6 +166,7 @@ function ligarAbas() {
 
 async function iniciar() {
   lerUrl();
+  $('data-ata').textContent = `Ata da reunião · ${new Date().toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo', day: 'numeric', month: 'long' })}`;
   $('busca').value = estado.q;
   $('ordem').value = estado.ordem;
   let t;
