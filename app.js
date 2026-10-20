@@ -3,6 +3,7 @@
 const LOJAS = { mercadolivre: 'Mercado Livre', amazon: 'Amazon', shopee: 'Shopee', magalu: 'Magalu' };
 // "No Mercado Livre ✓": onde a oferta está (não "vendido por": em marketplace quem vende pode ser um lojista).
 const CHECK = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 13.5l3.6-3.2 4.3 4.9L18.6 3 22.4 6 10.2 21z" fill="currentColor"/></svg>';
+const LOGOS = { mercadolivre: 'img/lojas/mercadolivre.svg', shopee: 'img/lojas/shopee.svg', magalu: 'img/lojas/magalu.svg' };
 function linhaLoja(el, loja) {
   el.replaceChildren('No ', Object.assign(document.createElement('strong'), { textContent: LOJAS[loja] }));
   el.insertAdjacentHTML('beforeend', CHECK);
@@ -124,9 +125,9 @@ function blocosParceiras() {
     b.className = `parceira parceira-${l}`;
     b.setAttribute('aria-pressed', String(estado.loja === l));
     b.setAttribute('aria-label', `${LOJAS[l]}: ${n} ${estado.aba === 'cupons' ? 'cupons' : 'ofertas'}${estado.loja === l ? ', filtro ativo' : ''}`);
-    const nome = document.createElement('span');
-    nome.className = 'parceira-nome';
-    nome.textContent = LOJAS[l];
+    // Logo da loja (Shopee e Magalu em branco sobre a cor delas); Amazon só com o nome, pelas regras de marca dela.
+    const nome = LOGOS[l] ? Object.assign(document.createElement('img'), { src: LOGOS[l], alt: '', className: 'parceira-logo' })
+      : Object.assign(document.createElement('span'), { className: 'parceira-nome', textContent: LOJAS[l] });
     const qt = document.createElement('span');
     qt.className = 'parceira-qt';
     qt.textContent = `${n} ${estado.aba === 'cupons' ? (n === 1 ? 'cupom' : 'cupons') : (n === 1 ? 'oferta' : 'ofertas')}`;

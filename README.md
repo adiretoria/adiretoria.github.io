@@ -50,6 +50,15 @@ Regras do Contrato Operacional e das Políticas do programa, que o site segue:
 
 Passo a passo para pedir de novo: [docs/amazon-associados.md](docs/amazon-associados.md).
 
+## Publicar mudanças de visual
+
+Ao mudar `estilo.css` ou `app.js`, troque o `?v=` nos `<link>`/`<script>` do `index.html` (e o do CSS em
+`amazon/index.html`). Sem isso, quem abriu o site nos últimos 10 minutos pode ver a página nova com o script velho
+(o GitHub Pages guarda os arquivos em cache).
+
+Logos das lojas (`img/lojas/`): versões do Wikimedia Commons; Shopee e Magalu recoloridas em branco para o fundo
+na cor da loja. São marcas das respectivas empresas, usadas só para indicar onde está a oferta.
+
 ## Segurança
 
 - O site e o exportador só aceitam links https das lojas atendidas (Amazon, Mercado Livre, Shopee e

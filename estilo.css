@@ -52,10 +52,12 @@ h1 { margin: 0; font-family: var(--display); font-weight: 400; font-size: clamp(
 .parceiras { padding: 26px 0 4px; }
 .parceiras .rotulo { margin: 0 0 12px; font-size: 12px; }
 .parceiras-grade { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
-.parceira { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; min-height: 76px; padding: 14px 18px; border: 2px solid var(--azul); border-radius: 6px; font: inherit; text-align: left; cursor: pointer; box-shadow: 4px 4px 0 var(--azul); transition: transform .12s, box-shadow .12s; }
+.parceira { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; min-height: 96px; padding: 14px 18px; border: 2px solid var(--azul); border-radius: 6px; font: inherit; text-align: left; cursor: pointer; box-shadow: 4px 4px 0 var(--azul); transition: transform .12s, box-shadow .12s; }
 .parceira:hover { transform: translate(-2px, -2px); box-shadow: 6px 6px 0 var(--azul); }
 .parceira[aria-pressed='true'] { outline: 4px solid var(--lima); outline-offset: 2px; }
-.parceira-nome { font-family: var(--display); font-size: 26px; line-height: 1.05; letter-spacing: .01em; }
+.parceira-nome { font-family: var(--display); font-size: 30px; line-height: 1.05; letter-spacing: .01em; }
+.parceira-logo { height: 44px; width: auto; max-width: 78%; }
+.parceira-mercadolivre .parceira-logo { height: 50px; }
 .parceira-qt { font-size: 13.5px; font-weight: 700; }
 .parceira-mercadolivre { background: #FFE600; color: #2D3277; }
 .parceira-shopee { background: #EE4D2D; color: #FFFFFF; }
@@ -164,9 +166,12 @@ input:focus, select:focus { outline: none; box-shadow: 0 0 0 4px var(--lima); }
   .carimbo { top: 8px; right: -6px; }
   .carimbo-topo { display: none; }
   .carimbo-pct { font-size: 19px; }
-  .parceiras-grade { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
-  .parceira { min-height: 64px; padding: 10px 12px; }
-  .parceira-nome { font-size: 21px; }
+  .parceiras-grade { grid-template-columns: repeat(auto-fit, minmax(96px, 1fr)); gap: 8px; }
+  .parceira { min-height: 78px; padding: 10px 6px; gap: 6px; box-shadow: 3px 3px 0 var(--azul); }
+  .parceira-nome { font-size: 20px; }
+  .parceira-logo { height: 22px; max-width: 92%; }
+  .parceira-mercadolivre .parceira-logo { height: 30px; }
+  .parceira-qt { font-size: 12px; }
   .cupons { grid-template-columns: minmax(0, 1fr); }
   .cupom { grid-template-columns: 96px minmax(0, 1fr); }
   .rodape-dentro { grid-template-columns: minmax(0, 1fr); }
