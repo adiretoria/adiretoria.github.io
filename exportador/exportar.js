@@ -23,12 +23,27 @@ const iso = (s) => (s ? `${s.replace(' ', 'T')}${s.endsWith('Z') ? '' : 'Z'}` : 
 const selo = (s) => String(s ?? '').split(' · ').filter((x) => x && !/[{}]/.test(x)).join(' · ').slice(0, 140) || null;
 const NOME_LOJA = { amazon: 'Amazon', shopee: 'Shopee', mercadolivre: 'Mercado Livre', magalu: 'Magalu' };
 
+// Amazon (Contrato Operacional e Políticas do Programa de Associados Amazon.com.br):
+// - preço, disponibilidade e imagem só podem ser exibidos se vierem da API da Amazon; o robô não usa a API,
+//   então o site mostra só o nome e um link direto amazon.com.br/dp/ASIN com a tag (sem encurtador);
+// - nada de selo de histórico/menor preço (rastreamento de preço é proibido);
+// - só entra com a conta ativa e a tag informada em config.json (amazon.ativo / amazon.tag).
+export function linkAmazon(url, tag = config.amazon?.tag) {
+  const asin = String(url ?? '').match(/\/(?:dp|gp\/product|gp\/aw\/d)\/([A-Z0-9]{10})(?:[/?#]|$)/i)?.[1]?.toUpperCase();
+  return asin && /^[a-z0-9][a-z0-9-]{1,60}-20$/.test(tag ?? '') ? { asin, link: `https://www.amazon.com.br/dp/${asin}?tag=${tag}` } : null;
+}
+const amazonAtiva = () => config.amazon?.ativo === true && !!linkAmazon('/dp/B000000000');
+
 // Ofertas: publicadas (confirmadas pelo canal) nos últimos N dias, sem revisão pendente, com preço e link de loja.
 // "em" é quando a oferta foi publicada no grupo: o site mostra o preço daquele momento, não um preço atual.
 export function montarDados(db) {
   const ofertas = db.prepare(`select id, loja, nome, preco_cent, preco_original_cent, preco_pix_cent, imagem, afiliado, selo, cupom_loja, enviado_em
     from ofertas where enviado_em >= datetime('now', ?) and revisao is null and preco_cent > 0 and nome is not null
     order by enviado_em desc limit ?`).all(`-${config.dias} days`, config.maxOfertas).map((o) => {
+    if (o.loja === 'amazon') {
+      const amz = amazonAtiva() && linkAmazon(o.afiliado);
+      return amz ? { id: o.id, loja: 'amazon', nome: o.nome.trim().slice(0, 220), asin: amz.asin, link: amz.link, em: iso(o.enviado_em) } : null;
+    }
     const link = linkSeguro(o.afiliado);
     if (!link || !NOME_LOJA[o.loja]) return null;
     let cupom = null;
@@ -52,7 +67,7 @@ export function montarDados(db) {
     and (validade is null or validade > strftime('%Y-%m-%dT%H:%M:%SZ', 'now')) order by enviado_em desc limit 100`).all(`-${config.dias} days`).map((c) => {
     const texto = textoDoCupom.get(c.id, `cupom %#${c.campanha}`)?.texto ?? '';
     const link = (texto.match(/https:\/\/[^\s*~_]+/g) ?? []).map(linkSeguro).find(Boolean);
-    if (!link || !NOME_LOJA[c.loja]) return null;
+    if (!link || !NOME_LOJA[c.loja] || c.loja === 'amazon') return null; // cupom da Amazon: sem fonte oficial
     return {
       id: c.id, loja: c.loja, titulo: String(c.titulo ?? '').slice(0, 160), detalhe: c.subtitulo?.slice(0, 200) ?? null,
       valor: c.valor, tipo: c.tipo, minimo: c.minimo_cent, teto: c.teto_cent, validade: c.validade, link, em: iso(c.enviado_em),
@@ -60,7 +75,7 @@ export function montarDados(db) {
   }).filter(Boolean);
 
   const grupos = Object.fromEntries(Object.entries(config.grupos).filter(([, u]) => /^https:\/\/(chat\.whatsapp\.com|whatsapp\.com|t\.me)\//.test(u)));
-  return { grupos, ofertas, cupons };
+  return { grupos, amazon: amazonAtiva() ? { tag: config.amazon.tag } : null, ofertas, cupons };
 }
 
 function git(...args) {

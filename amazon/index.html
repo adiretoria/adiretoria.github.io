@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Oferta na Amazon — A Diretoria</title>
+<meta name="description" content="Oferta aprovada pela Diretoria na Amazon.">
+<meta name="theme-color" content="#0B1F3A">
+<link rel="icon" href="../img/a-diretoria-foto-perfil.png">
+<link rel="stylesheet" href="../estilo.css">
+<style>
+  .ponte { max-width: 640px; margin: 0 auto; padding: 40px 24px 64px; }
+  .ponte h1 { font-size: clamp(28px, 6vw, 40px); margin: 6px 0 14px; }
+  .ponte .ver { display: inline-block; text-decoration: none; padding: 14px 26px; font-size: 17px; margin: 8px 0 18px; }
+  .ponte .ver:hover { background: var(--vermelho); }
+  .ponte p { max-width: 60ch; }
+</style>
+</head>
+<body>
+<header class="topo"><div class="topo-dentro">
+  <a class="marca" href="../"><span class="marca-nome">A DIRETORIA</span><span class="marca-sub">Ofertas aprovadas em ata</span></a>
+</div></header>
+<main class="ponte" id="ponte">
+  <p class="saudacao">Oferta na Amazon</p>
+  <h1 id="nome">Carregando a oferta…</h1>
+  <p id="aviso">Preço e disponibilidade direto na Amazon.</p>
+  <a class="ver" id="ir" rel="sponsored nofollow noopener" hidden>Ver preço na Amazon</a>
+  <p class="declaracao" id="declaracao"></p>
+  <p><a href="../">Ver todas as ofertas aprovadas</a></p>
+</main>
+<script type="module">
+// Página intermediária pública (exigência do Programa de Associados: o clique sai do site cadastrado).
+// Nunca redireciona sozinha: a pessoa clica no botão. Sem preço ou imagem da Amazon.
+const DECLARACAO = 'Como participante do Programa de Associados da Amazon, sou remunerado pelas compras qualificadas efetuadas.';
+const asin = (new URLSearchParams(location.search).get('asin') ?? '').toUpperCase();
+const $ = (id) => document.getElementById(id);
+try {
+  if (!/^[A-Z0-9]{10}$/.test(asin)) throw new Error('asin');
+  const j = await (await fetch('../dados/ofertas.json', { cache: 'no-cache' })).json();
+  const tag = j.amazon?.tag;
+  if (!tag || !/^[a-z0-9][a-z0-9-]{1,60}-20$/.test(tag)) throw new Error('pausada');
+  const o = (j.ofertas ?? []).find((x) => x.loja === 'amazon' && x.asin === asin);
+  $('nome').textContent = o?.nome ?? 'Produto na Amazon';
+  $('ir').href = `https://www.amazon.com.br/dp/${asin}?tag=${tag}`;
+  $('ir').hidden = false;
+  $('declaracao').textContent = DECLARACAO;
+} catch (e) {
+  $('nome').textContent = e.message === 'pausada' ? 'Ofertas da Amazon pausadas no momento' : 'Oferta não encontrada';
+  $('aviso').textContent = 'Veja as outras ofertas aprovadas pela Diretoria.';
+}
+</script>
+</body>
+</html>

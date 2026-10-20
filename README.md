@@ -35,6 +35,21 @@ depois de 24 h, avisa que o preço pode ter mudado.
 - `powershell -ExecutionPolicy Bypass -File exportador\agendar.ps1`: liga a atualização a cada 15 min
   (`-Remover` desliga; o site continua no ar com a última lista).
 
+## Amazon (Programa de Associados)
+
+Regras do Contrato Operacional e das Políticas do programa, que o site segue:
+- **Declaração obrigatória** em cada card da Amazon, na página intermediária e no rodapé: "Como participante do
+  Programa de Associados da Amazon, sou remunerado pelas compras qualificadas efetuadas."
+- **Sem preço, imagem, avaliação ou selo de histórico da Amazon.** Esses dados só podem vir da API da Amazon,
+  e o robô não a usa. O card mostra o nome e "Ver preço na Amazon".
+- **Link direto** `https://www.amazon.com.br/dp/ASIN?tag=SUA-TAG`, sem encurtador e sem redirecionamento automático.
+- **Página intermediária** `amazon/?asin=ASIN`: é o link que deve ir para os grupos no lugar do link da Amazon,
+  para o clique sair do site cadastrado. Ela só leva à Amazon quando a pessoa clica.
+- A Amazon só aparece com `amazon.ativo: true` e uma tag válida em `exportador/config.json`. Com a conta
+  fechada, fica desligada.
+
+Passo a passo para pedir de novo: [docs/amazon-associados.md](docs/amazon-associados.md).
+
 ## Segurança
 
 - O site e o exportador só aceitam links https das lojas atendidas (Amazon, Mercado Livre, Shopee e

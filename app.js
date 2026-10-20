@@ -5,7 +5,9 @@ const POR_PAGINA = 24;
 const $ = (id) => document.getElementById(id);
 const reais = (c) => (c / 100).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 const semAcento = (s) => String(s ?? '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
-const desconto = (o) => (o.de ? Math.round((1 - o.preco / o.de) * 100) : 0);
+const desconto = (o) => (o.de && o.preco ? Math.round((1 - o.preco / o.de) * 100) : 0);
+// Frase exigida pelo Contrato Operacional do Programa de Associados Amazon.com.br (cláusula 5).
+export const DECLARACAO_AMAZON = 'Como participante do Programa de Associados da Amazon, sou remunerado pelas compras qualificadas efetuadas.';
 // Defesa extra: só https das lojas, mesmo que o arquivo de dados venha alterado.
 const HOSTS = ['amazon.com.br', 'amzn.to', 'shopee.com.br', 'shope.ee', 'mercadolivre.com.br', 'meli.la', 'magazinevoce.com.br', 'magazineluiza.com.br'];
 const linkLoja = (u) => { const x = URL.parse(String(u ?? '')); return x && x.protocol === 'https:' && HOSTS.some((h) => x.hostname === h || x.hostname.endsWith(`.${h}`)) ? x.href : null; };
@@ -42,12 +44,27 @@ function gravarUrl() {
 const casa = (texto) => semAcento(estado.q).split(/\s+/).filter(Boolean).every((t) => semAcento(texto).includes(t));
 const filtrarOfertas = () => {
   const lista = dados.ofertas.filter((o) => (!estado.loja || o.loja === estado.loja) && casa(`${o.nome} ${LOJAS[o.loja]}`));
-  const ordem = { desconto: (a, b) => desconto(b) - desconto(a), menor: (a, b) => a.preco - b.preco, maior: (a, b) => b.preco - a.preco }[estado.ordem];
+  // Amazon não tem preço no site (só a loja pode exibir): vai para o fim quando a ordem é por preço.
+  const p = (o, semPreco) => o.preco ?? semPreco;
+  const ordem = { desconto: (a, b) => desconto(b) - desconto(a), menor: (a, b) => p(a, Infinity) - p(b, Infinity), maior: (a, b) => p(b, -1) - p(a, -1) }[estado.ordem];
   return ordem ? lista.sort(ordem) : lista;
 };
 const filtrarCupons = () => dados.cupons.filter((c) => (!estado.loja || c.loja === estado.loja) && casa(`${c.titulo} ${c.detalhe ?? ''} ${LOJAS[c.loja]}`));
 
+// Amazon: só nome e link direto com a tag. Preço, imagem e selos só poderiam vir da API da Amazon.
+function cartaoAmazon(o) {
+  const el = $('modelo-amazon').content.firstElementChild.cloneNode(true);
+  const a = el.querySelector('.oferta-link');
+  a.href = o.link;
+  a.setAttribute('aria-label', `${o.nome}: ver preço na Amazon`);
+  el.querySelector('.nome').textContent = o.nome;
+  el.querySelector('.quando').textContent = quando(o.em).replace(' · o preço pode ter mudado', '');
+  el.querySelector('.declaracao').textContent = DECLARACAO_AMAZON;
+  return el;
+}
+
 function cartaoOferta(o) {
+  if (o.loja === 'amazon') return cartaoAmazon(o);
   const el = $('modelo-oferta').content.firstElementChild.cloneNode(true);
   const a = el.querySelector('.oferta-link');
   a.href = o.link;
@@ -163,13 +180,14 @@ async function iniciar() {
     const j = await r.json();
     dados = {
       grupos: j.grupos ?? {},
-      ofertas: (j.ofertas ?? []).filter((o) => LOJAS[o.loja] && linkLoja(o.link) && o.preco > 0).map((o) => ({ ...o, link: linkLoja(o.link), img: /^https:\/\//.test(o.img ?? '') ? o.img : null })),
+      ofertas: (j.ofertas ?? []).filter((o) => LOJAS[o.loja] && linkLoja(o.link) && (o.preco > 0 || (o.loja === 'amazon' && /^https:\/\/www\.amazon\.com\.br\/dp\//.test(o.link)))).map((o) => ({ ...o, link: linkLoja(o.link), img: /^https:\/\//.test(o.img ?? '') ? o.img : null })),
       cupons: (j.cupons ?? []).filter((c) => LOJAS[c.loja] && linkLoja(c.link)),
     };
     for (const [canal, url] of Object.entries(dados.grupos)) {
       const a = $(`grupo-${canal}`);
       if (a && /^https:\/\/(chat\.whatsapp\.com|whatsapp\.com|t\.me)\//.test(url)) { a.href = url; a.hidden = false; }
     }
+    if (j.amazon) $('declaracao-amazon').textContent = DECLARACAO_AMAZON;
     if (j.geradoEm) $('atualizado').textContent = `Lista atualizada em ${new Date(j.geradoEm).toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo', dateStyle: 'short', timeStyle: 'short' })}.`;
     render();
   } catch {

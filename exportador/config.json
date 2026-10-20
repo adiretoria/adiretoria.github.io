@@ -5,5 +5,9 @@
   "grupos": {
     "whatsapp": "",
     "telegram": "https://t.me/adiretoriacompras"
+  },
+  "amazon": {
+    "ativo": false,
+    "tag": ""
   }
 }

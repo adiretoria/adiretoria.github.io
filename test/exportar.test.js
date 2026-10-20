@@ -12,7 +12,7 @@ function banco() {
     minimo_cent integer, teto_cent integer, validade text, enviado_em text);
   create table envios (id integer primary key, texto text, origem text, cupom_id integer);`);
   const o = db.prepare("insert into ofertas (loja, nome, preco_cent, preco_original_cent, imagem, afiliado, selo, enviado_em, revisao) values (?,?,?,?,?,?,?,?,?)");
-  o.run('amazon', 'Publicada', 10000, 20000, 'https://m.media-amazon.com/x.jpg', 'https://amzn.to/abc', '{amount} OFF com Cupom · Menor preço observado desde 04/10', "2026-01-01 00:00:00".replace('2026-01-01', new Date().toISOString().slice(0, 10)), null);
+  o.run('mercadolivre', 'Publicada', 10000, 20000, 'https://http2.mlstatic.com/x.jpg', 'https://meli.la/abc', '{amount} OFF com Cupom · Menor preço observado desde 04/10', "2026-01-01 00:00:00".replace('2026-01-01', new Date().toISOString().slice(0, 10)), null);
   o.run('amazon', 'Só na fila', 10000, null, null, 'https://amzn.to/x', null, null, null);
   o.run('mercadolivre', 'Em revisão', 10000, null, null, 'https://meli.la/x', null, new Date().toISOString().slice(0, 19).replace('T', ' '), 'preço não confirmado');
   o.run('shopee', 'Link estranho', 10000, null, 'javascript:alert(1)', 'https://evil.example/x', null, new Date().toISOString().slice(0, 19).replace('T', ' '), null);
@@ -49,4 +49,21 @@ test('links: só https das lojas, sem porta nem credenciais', () => {
 test('grupos: só convites do WhatsApp e do Telegram', () => {
   const d = montarDados(banco());
   assert.deepEqual(Object.keys(d.grupos), ['telegram']); // WhatsApp vazio no config até ser informado
+});
+
+test('Amazon: fora do site com a conta inativa; ativa, só nome e link direto com a tag (sem preço, imagem ou selo)', async () => {
+  const { config } = await import('../exportador/exportar.js');
+  assert.equal(montarDados(banco()).ofertas.some((o) => o.loja === 'amazon'), false);
+  const db = banco();
+  db.prepare("update ofertas set loja = 'amazon', afiliado = 'https://www.amazon.com.br/dp/B0BZ129NTZ?tag=velha-20' where nome = 'Publicada'").run();
+  config.amazon = { ativo: true, tag: 'nova-20' };
+  try {
+    const d = montarDados(db);
+    const [o] = d.ofertas.filter((x) => x.loja === 'amazon');
+    assert.deepEqual(o && Object.keys(o).sort(), ['asin', 'em', 'id', 'link', 'loja', 'nome']);
+    assert.equal(o.link, 'https://www.amazon.com.br/dp/B0BZ129NTZ?tag=nova-20');
+    assert.deepEqual(d.amazon, { tag: 'nova-20' });
+  } finally {
+    config.amazon = { ativo: false, tag: '' };
+  }
 });
