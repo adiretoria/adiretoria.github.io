@@ -66,10 +66,13 @@ const filtrarOfertas = () => {
 };
 const filtrarCupons = () => dados.cupons.filter((c) => (!estado.loja || c.loja === estado.loja) && casa(`${c.titulo} ${c.detalhe ?? ''} ${LOJAS[c.loja]}`));
 
-// Compartilhar no WhatsApp: leva para a oferta no nosso site (nunca o link da loja direto, e sem preço da Amazon).
+// Compartilhar no WhatsApp: Mercado Livre, Shopee e Magalu vão direto para a loja (link de afiliado).
+// Amazon passa pela página intermediária do site: a regra do Programa de Associados exige que o clique saia do
+// site cadastrado, e conversa de WhatsApp não é site público. Sem emoji (alguns WhatsApp mostram "�").
 function ligarCompartilhar(el, o) {
+  const destino = o.loja === 'amazon' ? `Veja o preço na Amazon: ${SITE}amazon/?asin=${o.asin}` : o.link;
   const preco = o.loja !== 'amazon' && o.preco ? ` por ${reais(o.preco)}` : '';
-  const texto = `${o.nome}${preco} — aprovado pela Diretoria ✅\n${SITE}?oferta=${o.id}`;
+  const texto = `${o.nome}${preco}\n${destino}\n\nMais ofertas aprovadas pela Diretoria: ${SITE}`;
   const a = el.querySelector('.compartilhar');
   a.href = `https://wa.me/?text=${encodeURIComponent(texto)}`;
   a.setAttribute('aria-label', `Compartilhar ${o.nome} no WhatsApp`);
