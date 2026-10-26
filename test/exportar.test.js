@@ -112,3 +112,13 @@ test('Amazon: fora do site com a conta inativa; ativa, só nome e link direto co
     config.amazon = { ativo: false, tag: '' };
   }
 });
+
+test('cupom de campanha usa o link guardado no envio; cupom esgotado sai do site', () => {
+  const db = banco();
+  db.exec("alter table cupons_lojas add column esgotado_em text; create table envio_cupons (envio_id integer, cupom_id integer, link text)");
+  db.prepare("delete from envios").run();
+  db.prepare("insert into envio_cupons values (50, 1, 'https://meli.la/campanha1')").run();
+  assert.deepEqual(montarDados(db).cupons.map((c) => c.link), ['https://meli.la/campanha1']);
+  db.prepare("update cupons_lojas set esgotado_em = datetime('now') where id = 1").run();
+  assert.equal(montarDados(db).cupons.length, 0);
+});

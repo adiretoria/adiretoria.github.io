@@ -95,11 +95,17 @@ export function montarDados(db) {
   // Campanha de comissão da Shopee não é desconto para o cliente: fica fora.
   const textoDoCupom = db.prepare('select texto from envios where cupom_id = ? order by id desc limit 1');
   const textoLegado = db.prepare('select texto from envios where cupom_id is null and origem = ? order by id desc limit 1');
+  // Campanha de cupons (vários cupons numa mensagem): o link de compra de cada cupom fica em envio_cupons.
+  // Banco de versão anterior não tem a tabela nem a coluna de esgotado: o exportador segue sem elas.
+  const temTabela = db.prepare("select 1 from sqlite_master where type = 'table' and name = 'envio_cupons'").get();
+  const linkCampanha = temTabela ? db.prepare('select link from envio_cupons where cupom_id = ? and link is not null order by envio_id desc limit 1') : null;
+  const temEsgotado = db.prepare("select 1 from pragma_table_info('cupons_lojas') where name = 'esgotado_em'").get();
   const cupons = db.prepare(`select id, loja, campanha, titulo, subtitulo, tipo, valor, minimo_cent, teto_cent, validade, enviado_em
-    from cupons_lojas where enviado_em >= datetime('now', ?) and coalesce(tipo, '') != 'comissao'
+    from cupons_lojas where enviado_em >= datetime('now', ?) and coalesce(tipo, '') != 'comissao' ${temEsgotado ? 'and esgotado_em is null' : ''}
     order by enviado_em desc limit 200`).all(`-${config.dias} days`).filter(c=>cupomVigente(c)).map((c) => {
     const texto = (textoDoCupom.get(c.id) ?? textoLegado.get(`cupom ${NOME_LOJA[c.loja]} #${c.campanha}`))?.texto ?? '';
-    const link = (texto.match(/https:\/\/[^\s*<>]+/g) ?? []).map(u=>linkLoja(u,c.loja)).find(Boolean);
+    const link = (texto.match(/https:\/\/[^\s*<>]+/g) ?? []).map(u=>linkLoja(u,c.loja)).find(Boolean)
+      ?? (linkCampanha ? linkLoja(linkCampanha.get(c.id)?.link, c.loja) : null);
     if (!link || !NOME_LOJA[c.loja] || c.loja === 'amazon') return null; // cupom da Amazon: sem fonte oficial
     return {
       id: c.id, loja: c.loja, titulo: String(c.titulo ?? '').slice(0, 160), detalhe: c.subtitulo?.slice(0, 200) ?? null,
