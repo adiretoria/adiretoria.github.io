@@ -59,11 +59,19 @@ const amazonAtiva = () => config.amazon?.ativo === true && !!linkAmazon('https:/
 // Ofertas: publicadas (confirmadas pelo canal) nos últimos N dias, sem revisão pendente, com preço (Amazon: sem preço,
 // ver regras abaixo) e link de loja.
 // Publicação e coleta têm datas distintas: uma coleta posterior pode atualizar o registro da oferta.
+// Oferta já na fila de envio de um grupo entra no site na hora, sem esperar a fila andar.
 export function montarDados(db) {
-  const ofertas = db.prepare(`select id, loja, nome, preco_cent, preco_original_cent, preco_pix_cent, imagem, afiliado, selo, cupom_loja, enviado_em,
-    coletado, editado_em, categoria, fonte, dados_comerciais
-    from ofertas where enviado_em >= datetime('now', ?) and revisao is null and (preco_cent > 0 or loja = 'amazon') and nome is not null
-    order by enviado_em desc limit ?`).all(`-${config.dias} days`, config.maxOfertas).map((o) => {
+  const temFila = db.prepare("select 1 from sqlite_master where type = 'table' and name = 'entregas'").get();
+  // Cópia de grupo (clone) guarda os produtos em envio_produtos, ligados pela chave.
+  const temProdutos = temFila && db.prepare("select 1 from sqlite_master where type = 'table' and name = 'envio_produtos'").get();
+  const naFila = temFila ? `or id in (select v.oferta_id from envios v join entregas e on e.envio_id = v.id
+    where e.estado in ('pendente', 'processando') and v.oferta_id is not null)
+    ${temProdutos ? `or chave in (select p.chave from envio_produtos p join entregas e on e.envio_id = p.envio_id
+    where e.estado in ('pendente', 'processando'))` : ''}` : '';
+  const ofertas = db.prepare(`select id, loja, nome, preco_cent, preco_original_cent, preco_pix_cent, imagem, afiliado, selo, cupom_loja,
+    coalesce(enviado_em, coletado) enviado_em, coletado, editado_em, categoria, fonte, dados_comerciais
+    from ofertas where (enviado_em >= datetime('now', ?) ${naFila}) and revisao is null and (preco_cent > 0 or loja = 'amazon') and nome is not null
+    order by coalesce(enviado_em, coletado) desc limit ?`).all(`-${config.dias} days`, config.maxOfertas).map((o) => {
     if (o.loja === 'amazon') {
       const amz = amazonAtiva() && linkAmazon(o.afiliado);
       return amz ? { id: o.id, loja: 'amazon', nome: o.nome.trim().slice(0, 220), asin: amz.asin, link: amz.link, em: iso(o.enviado_em) } : null;

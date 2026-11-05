@@ -1,4 +1,4 @@
-# Atualiza o site a cada 15 minutos: exporta as ofertas publicadas pelo robô e envia ao GitHub (sem janela).
+# Atualiza o site a cada 5 minutos: exporta as ofertas publicadas pelo robô e envia ao GitHub (sem janela).
 # Uso:     powershell -ExecutionPolicy Bypass -File exportador\agendar.ps1
 # Remover: powershell -ExecutionPolicy Bypass -File exportador\agendar.ps1 -Remover
 param([switch]$Remover)
@@ -20,8 +20,8 @@ if ((Test-Path `$log) -and (Get-Item `$log).Length -gt 1MB) { Move-Item -Force `
 "@
 $acao = New-ScheduledTaskAction -Execute 'powershell.exe' -Argument "-NoProfile -WindowStyle Hidden -ExecutionPolicy Bypass -File `"$pasta\exportador\rodar.ps1`"" -WorkingDirectory $pasta
 $aoEntrar = New-ScheduledTaskTrigger -AtLogOn -User $env:USERNAME
-$aCada15min = New-ScheduledTaskTrigger -Once -At (Get-Date).AddMinutes(1) -RepetitionInterval (New-TimeSpan -Minutes 15)
+$aCada5min = New-ScheduledTaskTrigger -Once -At (Get-Date).AddMinutes(1) -RepetitionInterval (New-TimeSpan -Minutes 5)
 $config = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -StartWhenAvailable -MultipleInstances IgnoreNew -ExecutionTimeLimit (New-TimeSpan -Minutes 5)
-Register-ScheduledTask -TaskName $nome -Action $acao -Trigger @($aoEntrar, $aCada15min) -Settings $config -Description 'A Diretoria: atualiza o site de ofertas (GitHub Pages)' -Force | Out-Null
+Register-ScheduledTask -TaskName $nome -Action $acao -Trigger @($aoEntrar, $aCada5min) -Settings $config -Description 'A Diretoria: atualiza o site de ofertas (GitHub Pages)' -Force | Out-Null
 Start-ScheduledTask -TaskName $nome
-Write-Output "Tarefa ${nome}: atualiza o site a cada 15 min. Log: $pasta\exportador\exportar.log"
+Write-Output "Tarefa ${nome}: atualiza o site a cada 5 min. Log: $pasta\exportador\exportar.log"

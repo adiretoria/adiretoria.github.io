@@ -125,3 +125,26 @@ test('cupom de campanha usa o link guardado no envio; cupom esgotado sai do site
   db.prepare("update cupons_lojas set esgotado_em = datetime('now') where id = 1").run();
   assert.equal(montarDados(db).cupons.length, 0);
 });
+
+test('oferta na fila de envio de um grupo já entra no site; falhou ou cancelada não', () => {
+  const db = banco();
+  db.exec(`alter table envios add column oferta_id integer;
+    create table entregas (id integer primary key, envio_id integer, estado text);`);
+  const o = db.prepare("insert into ofertas (loja, nome, preco_cent, afiliado, coletado) values ('mercadolivre', ?, 9900, 'https://meli.la/fila', datetime('now'))");
+  const fila = Number(o.run('Na fila').lastInsertRowid);
+  const falhou = Number(o.run('Falhou').lastInsertRowid);
+  const e = db.prepare("insert into envios (texto, origem, oferta_id) values ('x', 'busca #3', ?)");
+  db.prepare("insert into entregas (envio_id, estado) values (?, 'pendente')").run(e.run(fila).lastInsertRowid);
+  db.prepare("insert into entregas (envio_id, estado) values (?, 'falhou')").run(e.run(falhou).lastInsertRowid);
+  const nomes = montarDados(db).ofertas.map((x) => x.nome);
+  assert.ok(nomes.includes('Na fila'));
+  assert.ok(!nomes.includes('Falhou'));
+  assert.ok(montarDados(db).ofertas.find((x) => x.nome === 'Na fila').em);
+  // Cópia de grupo: produto ligado pela chave em envio_produtos.
+  db.exec("alter table ofertas add column chave text; create table envio_produtos (envio_id integer, chave text, loja text, afiliado text);");
+  db.prepare("insert into ofertas (chave, loja, nome, preco_cent, afiliado, coletado) values ('mercadolivre:MLB1', 'mercadolivre', 'Clone na fila', 5000, 'https://meli.la/c', datetime('now'))").run();
+  const v = db.prepare("insert into envios (texto, origem) values ('x', 'automação #1')").run().lastInsertRowid;
+  db.prepare("insert into envio_produtos values (?, 'mercadolivre:MLB1', 'mercadolivre', 'https://meli.la/c')").run(v);
+  db.prepare("insert into entregas (envio_id, estado) values (?, 'pendente')").run(v);
+  assert.ok(montarDados(db).ofertas.some((x) => x.nome === 'Clone na fila'));
+});
