@@ -56,12 +56,13 @@ export function linkAmazon(url, tag = config.amazon?.tag) {
 }
 const amazonAtiva = () => config.amazon?.ativo === true && !!linkAmazon('https://www.amazon.com.br/dp/B000000000');
 
-// Ofertas: publicadas (confirmadas pelo canal) nos últimos N dias, sem revisão pendente, com preço e link de loja.
+// Ofertas: publicadas (confirmadas pelo canal) nos últimos N dias, sem revisão pendente, com preço (Amazon: sem preço,
+// ver regras abaixo) e link de loja.
 // Publicação e coleta têm datas distintas: uma coleta posterior pode atualizar o registro da oferta.
 export function montarDados(db) {
   const ofertas = db.prepare(`select id, loja, nome, preco_cent, preco_original_cent, preco_pix_cent, imagem, afiliado, selo, cupom_loja, enviado_em,
     coletado, editado_em, categoria, fonte, dados_comerciais
-    from ofertas where enviado_em >= datetime('now', ?) and revisao is null and preco_cent > 0 and nome is not null
+    from ofertas where enviado_em >= datetime('now', ?) and revisao is null and (preco_cent > 0 or loja = 'amazon') and nome is not null
     order by enviado_em desc limit ?`).all(`-${config.dias} days`, config.maxOfertas).map((o) => {
     if (o.loja === 'amazon') {
       const amz = amazonAtiva() && linkAmazon(o.afiliado);
