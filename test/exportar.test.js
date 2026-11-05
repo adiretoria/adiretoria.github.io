@@ -108,6 +108,9 @@ test('Amazon: fora do site com a conta inativa; ativa, só nome e link direto co
     assert.deepEqual(o && Object.keys(o).sort(), ['asin', 'em', 'id', 'link', 'loja', 'nome']);
     assert.equal(o.link, 'https://www.amazon.com.br/dp/B0BZ129NTZ?tag=nova-20');
     assert.deepEqual(d.amazon, { tag: 'nova-20' });
+    // Amazon publicada sem preço (o robô não copia preço): entra mesmo assim, só com nome e link.
+    db.prepare("insert into ofertas (loja, nome, afiliado, enviado_em) values ('amazon', 'Sem preço', 'https://www.amazon.com.br/dp/B0SEMPRECO?tag=x-20', datetime('now'))").run();
+    assert.ok(montarDados(db).ofertas.some((x) => x.nome === 'Sem preço' && x.link === 'https://www.amazon.com.br/dp/B0SEMPRECO?tag=nova-20'));
   } finally {
     config.amazon = { ativo: false, tag: '' };
   }
