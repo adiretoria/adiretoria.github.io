@@ -75,3 +75,10 @@ test('destaques usam dados atuais, diversificam categorias e não confundem nome
 test('valores não finitos, negativos ou zero não geram preços compráveis',()=>{
   for(const preco of [NaN,Infinity,-5,0])assert.equal(R.precoComCondicoes(oferta({preco}),agora),null);
 });
+
+test('Nike e KaBuM!: só link da Awin passa', async () => {
+  const { linkLoja, LOJAS } = await import('../regras.js');
+  assert.equal(LOJAS.kabum, 'KaBuM!');
+  assert.ok(linkLoja('https://www.awin1.com/cread.php?awinmid=17729&awinaffid=3139356&ued=x', 'kabum'));
+  assert.equal(linkLoja('https://www.kabum.com.br/produto/1', 'kabum'), null);
+});

@@ -2,8 +2,8 @@
 // pelo exportador e pelos testes (Node). Nada aqui inventa dado: o que a fonte não informa vira condição a
 // conferir, nunca um preço calculado.
 
-export const LOJAS = { mercadolivre: 'Mercado Livre', amazon: 'Amazon', shopee: 'Shopee', magalu: 'Magalu' };
-const HOSTS = {amazon:['amazon.com.br','amzn.to'],shopee:['shopee.com.br','shope.ee'],mercadolivre:['mercadolivre.com.br','meli.la'],magalu:['magazinevoce.com.br','magazineluiza.com.br']};
+export const LOJAS = { mercadolivre: 'Mercado Livre', amazon: 'Amazon', shopee: 'Shopee', magalu: 'Magalu', nike: 'Nike', kabum: 'KaBuM!' };
+const HOSTS = {amazon:['amazon.com.br','amzn.to'],shopee:['shopee.com.br','shope.ee'],mercadolivre:['mercadolivre.com.br','meli.la'],magalu:['magazinevoce.com.br','magazineluiza.com.br'],nike:['awin1.com'],kabum:['awin1.com']}; // Nike e KaBuM!: link de afiliado da Awin
 export function linkLoja(u, loja) {
   try {
     const x = new URL(String(u ?? ''));

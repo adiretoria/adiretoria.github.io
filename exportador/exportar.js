@@ -42,7 +42,7 @@ function cupomPublico(s) {
 }
 // Selo com marcador não preenchido pela loja ("{amount} OFF com Cupom") não vai para o site.
 const selo = (s) => String(s ?? '').split(' · ').filter((x) => x && !/[{}]/.test(x)).join(' · ').slice(0, 140) || null;
-const NOME_LOJA = { amazon: 'Amazon', shopee: 'Shopee', mercadolivre: 'Mercado Livre', magalu: 'Magalu' };
+const NOME_LOJA = { amazon: 'Amazon', shopee: 'Shopee', mercadolivre: 'Mercado Livre', magalu: 'Magalu', nike: 'Nike', kabum: 'KaBuM!' };
 
 // Amazon (Contrato Operacional e Políticas do Programa de Associados Amazon.com.br):
 // - preço, disponibilidade e imagem só podem ser exibidos se vierem da API da Amazon; o robô não usa a API,
