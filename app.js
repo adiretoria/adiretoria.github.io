@@ -1,6 +1,8 @@
 // Dados públicos entram como texto; as regras de preço também são usadas pelo exportador e pelos testes.
 import { LOJAS, CATEGORIAS, FAIXAS, reais, semAcento, desconto, linkLoja, precoComCondicoes, situacao,
   quandoTexto, haQuanto, escolhasDaDiretoria, motivos, textoCompartilhar, filtrarOfertas, cupomVigente, fimValidade, categoriaDoNome } from './regras.js?v=20261020e';
+const ATALHOS_AMAZON=[['Ofertas do Dia','/deals'],['Mais vendidos','/gp/bestsellers'],['Eletrônicos','/gp/bestsellers/electronics'],['Informática','/gp/bestsellers/computers'],
+  ['Casa e cozinha','/gp/bestsellers/kitchen'],['Games','/gp/bestsellers/videogames'],['Beleza','/gp/bestsellers/beauty'],['Livros','/gp/bestsellers/books']];
 export const DECLARACAO_AMAZON = 'Como participante do Programa de Associados da Amazon, sou remunerado pelas compras qualificadas efetuadas.';
 const SITE = 'https://adiretoria.github.io/';
 const POR_PAGINA = 24;
@@ -204,6 +206,11 @@ async function carregar() {
       observer=new IntersectionObserver(([e])=>{$('barra-grupos').hidden=e.isIntersecting;});observer.observe(document.querySelector('.grupos'));
     }
     $('declaracao-amazon').textContent=j.amazon?DECLARACAO_AMAZON:'';
+    // Atalhos para as páginas de ofertas da Amazon, com a tag (sem preço nem imagem: só a Amazon mostra).
+    const tag=/^[a-z0-9][a-z0-9-]{1,60}-20$/.test(j.amazon?.tag??'')?j.amazon.tag:null;
+    $('amazon-atalhos').hidden=!tag;
+    if(tag)$('lista-amazon').replaceChildren(...ATALHOS_AMAZON.map(([nome,caminho])=>{const li=document.createElement('li');
+      li.append(Object.assign(document.createElement('a'),{href:`https://www.amazon.com.br${caminho}?tag=${tag}`,textContent:nome,rel:'sponsored noopener',target:'_blank'}));return li;}));
     $('atualizado').textContent=Number.isFinite(Date.parse(j.geradoEm))?`Lista atualizada em ${new Date(j.geradoEm).toLocaleString('pt-BR',{timeZone:'America/Sao_Paulo',dateStyle:'short',timeStyle:'short'})}. Cada preço tem sua própria data de conferência.`:'';
     $('resumo').textContent='Encontre a oferta, confira as condições e vá direto à loja.';render();
     if(estado.oferta)document.querySelector('.compartilhada')?.scrollIntoView({block:'center'});
