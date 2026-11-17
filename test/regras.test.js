@@ -82,3 +82,14 @@ test('Nike e KaBuM!: só link da Awin passa', async () => {
   assert.ok(linkLoja('https://www.awin1.com/cread.php?awinmid=17729&awinaffid=3139356&ued=x', 'kabum'));
   assert.equal(linkLoja('https://www.kabum.com.br/produto/1', 'kabum'), null);
 });
+
+test('cupom sem validade informada só vale 24 h depois de publicado; com validade, segue a data',()=>{
+  assert.equal(R.cupomVigente({em:'2026-10-19T05:00:00Z'},agora),true);
+  assert.equal(R.cupomVigente({em:'2026-10-19T03:00:00Z'},agora),false);
+  assert.equal(R.cupomVigente({},agora),false);
+  assert.equal(R.cupomVigente({validade:'2099-01-01T00:00:00Z',em:'2020-01-01T00:00:00Z'},agora),true);
+  // Cupom de oferta sem validade: o código some do preço e das condições depois de 24 h da publicação da oferta.
+  const cupom={tipo:'pct',valor:10,codigo:'VELHO10',elegibilidadeConfirmada:true};
+  assert.match(R.precoComCondicoes(oferta({cupom}),agora).condicoes.join(' '),/VELHO10/);
+  assert.doesNotMatch(R.precoComCondicoes(oferta({cupom,em:'2026-10-18T03:00:00Z'}),agora).condicoes.join(' '),/VELHO10/);
+});

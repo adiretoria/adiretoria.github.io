@@ -113,13 +113,7 @@ input:focus, select:focus { outline: none; box-shadow: 0 0 0 4px var(--lima); }
 .quando.antiga { color: var(--alerta); }
 .ver { margin-top: 10px; display: block; text-align: center; font-weight: 700; font-size: 15px; color: var(--papel); background: var(--azul); padding: 12px; }
 
-/* Amazon: sem foto nem preço (regra do Programa de Associados). */
-.oferta-amazon .oferta-link { border-top-width: 8px; }
-.oferta-amazon .corpo { padding-top: 18px; }
-.oferta-amazon .nome { font-size: 20px; -webkit-line-clamp: 5; }
-.amazon-aviso { margin: 6px 0 0; font-size: 14px; }
 .declaracao { margin: 12px 0 0; font-size: 12px; line-height: 1.4; color: var(--cinza); }
-.declaracao-amazon:empty { display: none; }
 .declaracao-amazon { color: var(--papel); font-weight: 600; }
 
 /* Cupons: valor numa faixa lima, como o carimbo */
@@ -200,7 +194,6 @@ input:focus, select:focus { outline: none; box-shadow: 0 0 0 4px var(--lima); }
 .compartilhar { position: absolute; z-index: 2; top: 10px; left: 10px; display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; background: var(--branco); color: #1A8D4A; border: 2px solid var(--azul); }
 .compartilhar svg { width: 22px; height: 22px; }
 .compartilhar:hover { background: var(--lima); }
-.oferta-amazon .compartilhar { top: auto; bottom: 12px; left: auto; right: 12px; }
 .compartilhada .oferta-link { outline: 5px solid var(--lima); outline-offset: 3px; }
 
 /* Faixa "Maiores descontos de hoje" */
@@ -236,8 +229,6 @@ input:focus, select:focus { outline: none; box-shadow: 0 0 0 4px var(--lima); }
   .oferta .ver { padding: 9px; font-size: 14px; }
   .oferta .compartilhar { width: 44px; height: 44px; top: 6px; left: 6px; }
   .oferta .compartilhar svg { width: 18px; height: 18px; }
-  .oferta-amazon .oferta-link { grid-template-columns: minmax(0, 1fr); }
-  .oferta-amazon .compartilhar { top: auto; left: auto; }
   .destaques-lista { grid-auto-columns: 150px; }
   .barra-grupos { position: fixed; z-index: 20; left: 0; right: 0; bottom: 0; display: flex; gap: 8px; padding: 10px 12px calc(10px + env(safe-area-inset-bottom)); background: var(--azul); box-shadow: 0 -4px 0 rgba(16, 27, 45, .15); }
   .barra-grupos[hidden] { display: none; }
@@ -281,7 +272,6 @@ input:focus, select:focus { outline: none; box-shadow: 0 0 0 4px var(--lima); }
 .oferta-link { flex: 1; height: auto; }
 .nome { display: block; overflow: visible; overflow-wrap: anywhere; }
 .de { font-size: 12px; }
-.oferta-amazon .ver { padding-right: 54px; }
 .sem-foto::after { content: 'Imagem indisponível'; position: absolute; inset: 50% 8px auto; text-align: center; font-size: 12px; color: var(--cinza); }
 .erro { padding: 18px; background: var(--branco); border: 2px solid var(--alerta); }
 html { scroll-padding-bottom: 90px; }
@@ -308,10 +298,36 @@ html { scroll-padding-bottom: 90px; }
   .oferta .corpo { padding: 12px; gap: 5px; }
   .oferta .nome { font-size: 16px; }
   .oferta .ver { min-height: 44px; }
-  .oferta-amazon .compartilhar { top: 10px; right: 10px; bottom: auto; }
-  .oferta-amazon .loja { padding-right: 44px; min-height: 30px; }
-  .oferta-amazon .ver { padding-right: 9px; }
-  .oferta-amazon .nome { font-size: 18px; }
   main { padding-bottom: calc(96px + env(safe-area-inset-bottom)); }
   .cupom-valor { font-size: 25px; overflow-wrap: anywhere; }
+}
+
+/* Declaração do Programa de Associados: uma vez abaixo do topo e outra no rodapé, nunca dentro dos cards. */
+.aviso-associado { margin: 0; padding: 9px 16px; text-align: center; font-size: 13.5px; font-weight: 600; line-height: 1.4; color: var(--azul); background: var(--lima); }
+.aviso-associado[hidden], .declaracao-amazon[hidden] { display: none; }
+.rodape-links { display: flex; flex-wrap: wrap; gap: 4px 18px; margin: 6px 0; }
+.rodape-links a { color: var(--papel); font-weight: 600; min-height: 44px; display: inline-flex; align-items: center; }
+
+/* Vitrine da Amazon no topo da home */
+.vitrine-amazon { padding: 4px 0 26px; }
+.vitrine-topo { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 16px; }
+.vitrine-topo .rotulo { font-size: 17px; letter-spacing: .12em; margin: 0 0 4px; }
+.vitrine-todos { font-weight: 700; color: var(--azul); min-height: 44px; display: inline-flex; align-items: center; }
+
+/* Card da Amazon: sem foto nem preço (só a API oficial pode exibir). Botões lado a lado, sem nada flutuando sobre o texto. */
+.oferta-amazon { background: var(--branco); border: 2px solid var(--azul); }
+.amazon-capa { display: flex; align-items: flex-end; min-height: 76px; padding: 10px 14px; background: var(--azul); box-shadow: inset 0 -5px 0 #FF9900; }
+.amazon-categoria { font-family: var(--display); font-size: 22px; line-height: 1.05; text-transform: uppercase; color: var(--papel); }
+.oferta-amazon .nome { font-size: 18px; }
+.gancho { margin: 0; align-self: flex-start; font-size: 12.5px; font-weight: 700; line-height: 1.3; color: var(--azul); background: var(--papel); padding: 3px 7px; overflow-wrap: anywhere; }
+.gancho:empty { display: none; }
+.amazon-aviso { margin: 2px 0 0; font-size: 13.5px; color: var(--cinza); }
+.card-acoes { display: flex; gap: 8px; align-items: stretch; margin-top: 10px; }
+.card-acoes .ver { flex: 1; margin: 0; text-decoration: none; display: flex; align-items: center; justify-content: center; min-height: 44px; }
+.card-acoes .ver:hover, .card-acoes .ver:focus-visible { background: var(--lima); color: var(--azul); }
+.oferta-amazon .card-acoes .compartilhar { position: static; flex: 0 0 44px; width: 44px; height: 44px; align-self: center; }
+@media (max-width: 760px) {
+  .amazon-capa { min-height: 52px; padding: 8px 12px; }
+  .amazon-categoria { font-size: 18px; }
+  .oferta-amazon .nome { font-size: 16px; }
 }

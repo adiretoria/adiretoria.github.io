@@ -1,11 +1,11 @@
 // Dados públicos entram como texto; as regras de preço também são usadas pelo exportador e pelos testes.
 import { LOJAS, CATEGORIAS, FAIXAS, reais, semAcento, desconto, linkLoja, precoComCondicoes, situacao,
-  quandoTexto, haQuanto, escolhasDaDiretoria, motivos, textoCompartilhar, filtrarOfertas, cupomVigente, fimValidade, categoriaDoNome } from './regras.js?v=20261020e';
+  quandoTexto, haQuanto, escolhasDaDiretoria, motivos, textoCompartilhar, filtrarOfertas, cupomVigente, fimValidade, categoriaDoNome } from './regras.js?v=20261117a';
 const ATALHOS_AMAZON=[['Ofertas do Dia','/deals'],['Mais vendidos','/gp/bestsellers'],['Eletrônicos','/gp/bestsellers/electronics'],['Informática','/gp/bestsellers/computers'],
   ['Casa e cozinha','/gp/bestsellers/kitchen'],['Games','/gp/bestsellers/videogames'],['Beleza','/gp/bestsellers/beauty'],['Livros','/gp/bestsellers/books']];
-export const DECLARACAO_AMAZON = 'Como participante do Programa de Associados da Amazon, sou remunerado pelas compras qualificadas efetuadas.';
 const SITE = 'https://adiretoria.github.io/';
 const POR_PAGINA = 24;
+const VITRINE_AMAZON = 16; // ofertas da Amazon no topo da home (o revisor do programa abre a raiz do site)
 const $ = id => document.getElementById(id);
 const CHECK = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 13.5l3.6-3.2 4.3 4.9L18.6 3 22.4 6 10.2 21z" fill="currentColor"/></svg>';
 const LOGOS = {mercadolivre:'img/lojas/mercadolivre.svg',shopee:'img/lojas/shopee.svg',magalu:'img/lojas/magalu.svg'};
@@ -55,11 +55,12 @@ function imagem(el,src) {
 }
 function cartaoAmazon(o,agora) {
   const el=$('modelo-amazon').content.firstElementChild.cloneNode(true);
-  el.querySelector('.oferta-link').href=o.link;
-  el.querySelector('.oferta-link').setAttribute('aria-label',`${o.nome}: ver preço na Amazon`);
+  const ir=el.querySelector('.amazon-ir');
+  ir.href=o.link;ir.setAttribute('aria-label',`${o.nome}: conferir oferta atual na Amazon`);
+  el.querySelector('.amazon-categoria').textContent=o.categoria&&o.categoria!=='outras'?CATEGORIAS[o.categoria]:'Achado do dia';
+  el.querySelector('.gancho').textContent=o.gancho??'';
   el.querySelector('.nome').textContent=o.nome;
-  el.querySelector('.quando').textContent=`Publicada ${haQuanto(o.em,agora)}`;
-  el.querySelector('.declaracao').textContent=DECLARACAO_AMAZON;
+  el.querySelector('.quando').textContent=`Selecionado ${haQuanto(o.em,agora)}`;
   ligarCompartilhar(el,o,agora);return el;
 }
 function cartaoOferta(o,agora) {
@@ -121,9 +122,16 @@ function filtrosAtivos() {
   }));
   $('limpar').hidden=!filtros.some(([,t])=>t)&&estado.ordem==='recentes';
 }
+const naHome=()=>estado.aba==='ofertas'&&!estado.q&&!estado.loja&&!estado.categoria&&!estado.faixa&&!estado.anteriores&&!estado.oferta;
+// Home sem filtros: as ofertas recentes da Amazon abrem a página, antes das abas. Devolve os ids para não repetir na grade.
+function vitrineAmazon(agora) {
+  const lista=naHome()?filtrarOfertas(dados.ofertas,{loja:'amazon'},agora).slice(0,VITRINE_AMAZON):[];
+  $('vitrine-amazon').hidden=!lista.length;
+  $('lista-amazon-home').replaceChildren(...lista.map(o=>cartaoAmazon(o,agora)));
+  return new Set(lista.map(o=>o.id));
+}
 function faixaDestaques(agora) {
-  const mostrar=estado.aba==='ofertas'&&!estado.q&&!estado.loja&&!estado.categoria&&!estado.faixa&&!estado.anteriores&&!estado.oferta;
-  const lista=mostrar?escolhasDaDiretoria(dados.ofertas,agora):[];
+  const lista=naHome()?escolhasDaDiretoria(dados.ofertas,agora):[];
   $('destaques').hidden=!lista.length;
   $('lista-destaques').replaceChildren(...lista.map(o=>{
     const el=$('modelo-destaque').content.firstElementChild.cloneNode(true),p=precoComCondicoes(o,agora).principal;
@@ -142,16 +150,16 @@ function render() {
   }
   for(const id of ['campo-categoria','campo-faixa','campo-ordem','campo-anteriores'])$(id).hidden=cupons;
   $('busca').value=estado.q;$('categoria').value=estado.categoria;$('faixa').value=estado.faixa;$('anteriores').checked=estado.anteriores;
-  chipsLojas(agora);filtrosAtivos();faixaDestaques(agora);
+  chipsLojas(agora);filtrosAtivos();faixaDestaques(agora);const naVitrine=vitrineAmazon(agora);
   for(const b of $('ordens').children)b.setAttribute('aria-pressed',String(b.dataset.ordem===estado.ordem));
-  const lista=cupons?filtrarCupons(agora):filtrarOfertas(dados.ofertas,estado,agora);
+  const lista=cupons?filtrarCupons(agora):filtrarOfertas(dados.ofertas,estado,agora),grade=cupons?lista:lista.filter(o=>!naVitrine.has(o.id));
   if(cupons) {
     $('lista-cupons').replaceChildren(...lista.map(cartaoCupom));$('vazio-cupons').hidden=!!lista.length;
     $('vazio-cupons').textContent='Nenhum cupom com esses filtros e validade em aberto. Limpe os filtros ou tente outra busca.';
   } else {
-    $('lista-ofertas').replaceChildren(...lista.slice(0,estado.limite).map(o=>cartaoOferta(o,agora)));$('vazio-ofertas').hidden=!!lista.length;
+    $('lista-ofertas').replaceChildren(...grade.slice(0,estado.limite).map(o=>cartaoOferta(o,agora)));$('vazio-ofertas').hidden=!!lista.length;
     $('vazio-ofertas').textContent='Nenhuma oferta com esses filtros. Limpe os filtros ou inclua ofertas anteriores.';
-    $('mais-ofertas').hidden=lista.length<=estado.limite;
+    $('mais-ofertas').hidden=grade.length<=estado.limite;
   }
   $('contagem').textContent=`${lista.length} ${cupons?(lista.length===1?'cupom encontrado':'cupons encontrados'):(lista.length===1?'oferta encontrada':'ofertas encontradas')}${cupons?' · validade informada pela loja':estado.anteriores?' · incluindo publicações anteriores':' · publicadas nas últimas 48 h'}.`;
   if(estado.oferta&&dados.ofertas.some(o=>o.id===estado.oferta&&!situacao(o,agora).recente))$('contagem').textContent+=' Inclui a oferta antiga compartilhada.';
@@ -172,7 +180,7 @@ function ligarControles() {
   $('anteriores').addEventListener('change',()=>atualizar({anteriores:$('anteriores').checked}));
   for(const b of $('ordens').children)b.addEventListener('click',()=>atualizar({ordem:b.dataset.ordem}));
   $('limpar').addEventListener('click',()=>{clearTimeout(timer);estado={...padrao,aba:estado.aba};render();$('busca').focus();});
-  $('mais-ofertas').addEventListener('click',()=>{const novo=$('lista-ofertas').children.length;estado.limite+=POR_PAGINA;render();$('lista-ofertas').children[novo]?.querySelector('.oferta-link').focus();});
+  $('mais-ofertas').addEventListener('click',()=>{const novo=$('lista-ofertas').children.length;estado.limite+=POR_PAGINA;render();$('lista-ofertas').children[novo]?.querySelector('.oferta-link,.amazon-ir').focus();});
   const trocar=aba=>{atualizar({aba});$(`aba-${aba}`).focus();};
   for(const aba of ['ofertas','cupons'])$(`aba-${aba}`).addEventListener('click',()=>trocar(aba));
   document.querySelector('.abas').addEventListener('keydown',e=>{
@@ -192,7 +200,7 @@ async function carregar() {
     if(!Array.isArray(j.ofertas)||!Array.isArray(j.cupons))throw new Error('Formato inválido');
     const ofertas=j.ofertas.filter(o=>Object.hasOwn(LOJAS,o.loja)&&typeof o.nome==='string'&&linkLoja(o.link,o.loja)&&
       (o.loja==='amazon'?/^[A-Z0-9]{10}$/.test(o.asin):Number.isFinite(o.preco)&&o.preco>0)).map(o=>({...o,
-        img:/^https:\/\/[^\s"'<>()]+$/.test(o.img??'')?o.img:null,categoria:Object.hasOwn(CATEGORIAS,o.categoria)?o.categoria:categoriaDoNome(o.nome)}));
+        img:/^https:\/\/[^\s"'<>()]+$/.test(o.img??'')?o.img:null,gancho:typeof o.gancho==='string'?o.gancho.slice(0,120):null,categoria:Object.hasOwn(CATEGORIAS,o.categoria)?o.categoria:categoriaDoNome(o.nome)}));
     const cupons=j.cupons.filter(c=>c.loja!=='amazon'&&Object.hasOwn(LOJAS,c.loja)&&linkLoja(c.link,c.loja));
     dados={ofertas,cupons,grupos:j.grupos??{}};
     for(const canal of ['whatsapp','telegram']) {
@@ -205,7 +213,8 @@ async function carregar() {
     if('IntersectionObserver' in window&&(!$('grupo-whatsapp').hidden||!$('grupo-telegram').hidden)) {
       observer=new IntersectionObserver(([e])=>{$('barra-grupos').hidden=e.isIntersecting;});observer.observe(document.querySelector('.grupos'));
     }
-    $('declaracao-amazon').textContent=j.amazon?DECLARACAO_AMAZON:'';
+    // Declaração já está no HTML (visível sem JavaScript); só some se a Amazon estiver desligada.
+    for(const id of ['aviso-associado','declaracao-amazon'])$(id).hidden=!j.amazon;
     // Atalhos para as páginas de ofertas da Amazon, com a tag (sem preço nem imagem: só a Amazon mostra).
     const tag=/^[a-z0-9][a-z0-9-]{1,60}-20$/.test(j.amazon?.tag??'')?j.amazon.tag:null;
     $('amazon-atalhos').hidden=!tag;
