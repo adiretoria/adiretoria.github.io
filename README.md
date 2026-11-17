@@ -54,10 +54,16 @@ não afirma menor preço do mercado. O compartilhamento usa as mesmas condiçõe
 ## Amazon (Programa de Associados)
 
 Regras do Contrato Operacional e das Políticas do programa, que o site segue:
-- **Declaração obrigatória** em cada card da Amazon, na página intermediária e no rodapé: "Como participante do
-  Programa de Associados da Amazon, sou remunerado pelas compras qualificadas efetuadas."
+- **Declaração obrigatória** numa faixa logo abaixo do topo, no rodapé, na página intermediária e em `sobre/`
+  (não mais dentro de cada card): "Como participante do Programa de Associados da Amazon, sou remunerado pelas
+  compras qualificadas efetuadas."
 - **Sem preço, imagem, avaliação ou selo de histórico da Amazon.** Esses dados só podem vir da API da Amazon,
-  e o robô não a usa. O card mostra o nome e "Ver preço na Amazon".
+  e o robô não a usa. O card mostra a categoria, o nome real do produto, a frase do grupo como chamada e
+  "Conferir oferta atual na Amazon".
+- **Nome real obrigatório.** O exportador tira o nome do trecho antes de `/dp/` no link que chegou ao grupo
+  (sem abrir a página da Amazon). Oferta que só tem a frase de efeito ("CAMA PRO SEU CATIVEIRO") não entra.
+- **Home**: até 16 ofertas recentes da Amazon abrem a página, antes das abas (o revisor abre a raiz do site).
+- **Cupom sem validade informada** some 24 h depois de publicado, em qualquer loja.
 - **Link direto** `https://www.amazon.com.br/dp/ASIN?tag=SUA-TAG`, sem encurtador e sem redirecionamento automático.
 - **Página intermediária** `amazon/?asin=ASIN`: é o link que deve ir para os grupos no lugar do link da Amazon,
   para o clique sair do site cadastrado. Ela só leva à Amazon quando a pessoa clica.

@@ -7,7 +7,7 @@ import { montarDados, linkSeguro } from '../exportador/exportar.js';
 function banco() {
   const db = new DatabaseSync(':memory:');
   db.exec(`create table ofertas (id integer primary key, loja text, nome text, preco_cent integer, preco_original_cent integer, preco_pix_cent integer,
-    imagem text, afiliado text, selo text, cupom_loja text, enviado_em text, revisao text,
+    imagem text, url text, afiliado text, selo text, cupom_loja text, enviado_em text, revisao text,
     coletado text, editado_em text, categoria text, fonte text, dados_comerciais text);
   create table cupons_lojas (id integer primary key, loja text, campanha text, titulo text, subtitulo text, tipo text, valor real,
     minimo_cent integer, teto_cent integer, validade text, enviado_em text);
@@ -105,7 +105,7 @@ test('Amazon: fora do site com a conta inativa; ativa, só nome e link direto co
   try {
     const d = montarDados(db);
     const [o] = d.ofertas.filter((x) => x.loja === 'amazon');
-    assert.deepEqual(o && Object.keys(o).sort(), ['asin', 'em', 'id', 'link', 'loja', 'nome']);
+    assert.deepEqual(o && Object.keys(o).sort(), ['asin', 'categoria', 'em', 'gancho', 'id', 'link', 'loja', 'nome']);
     assert.equal(o.link, 'https://www.amazon.com.br/dp/B0BZ129NTZ?tag=nova-20');
     assert.deepEqual(d.amazon, { tag: 'nova-20' });
     // Amazon publicada sem preço (o robô não copia preço): entra mesmo assim, só com nome e link.
@@ -147,4 +147,24 @@ test('oferta na fila de envio de um grupo já entra no site; falhou ou cancelada
   db.prepare("insert into envio_produtos values (?, 'mercadolivre:MLB1', 'mercadolivre', 'https://meli.la/c')").run(v);
   db.prepare("insert into entregas (envio_id, estado) values (?, 'pendente')").run(v);
   assert.ok(montarDados(db).ofertas.some((x) => x.nome === 'Clone na fila'));
+});
+
+test('Amazon: nome real do produto no título; frase de efeito vira gancho; só frase de efeito não entra', async () => {
+  const { separarNomeAmazon, config } = await import('../exportador/exportar.js');
+  assert.deepEqual(separarNomeAmazon('3L DO MELHOR AMACIANTE', 'https://www.amazon.com.br/Amaciante-Concentrado-Downy-Perfume-M%C3%ADstico/dp/B098CL79W1?tag=x-20'),
+    { nome: 'Amaciante Concentrado Downy Perfume Místico', gancho: '3L DO MELHOR AMACIANTE' });
+  assert.deepEqual(separarNomeAmazon('Monitor LG UltraGear 25" IPS 200Hz', 'https://www.amazon.com.br/Monitor-LG/dp/B0HB7FQ67Y'), { nome: 'Monitor LG UltraGear 25" IPS 200Hz', gancho: null });
+  for (const gancho of ['CAMA PRO SEU CATIVEIRO DE 22M²', 'voltou e sempre acaba muito rápido, aproveita', 'Snickers é bom d+'])
+    assert.equal(separarNomeAmazon(gancho, 'https://www.amazon.com.br/dp/B0FZ99Y541'), null, gancho);
+  const db = banco();
+  db.prepare("insert into ofertas (loja, nome, url, afiliado, enviado_em) values ('amazon', 'ORGANIZE SUA GELADEIRA', 'https://www.amazon.com.br/Organizador-Cesto-Duplo-Natural/dp/B0CKLTF6KM', 'https://www.amazon.com.br/dp/B0CKLTF6KM?tag=adiretoria0cd-20', datetime('now'))").run();
+  db.prepare("insert into ofertas (loja, nome, afiliado, enviado_em) values ('amazon', 'MUITO ÚTIL NA FILA DO SHOW', 'https://www.amazon.com.br/dp/B075XM6DKH?tag=adiretoria0cd-20', datetime('now'))").run();
+  config.amazon = { ativo: true, tag: 'nova-20' };
+  try {
+    const amazon = montarDados(db).ofertas.filter((o) => o.loja === 'amazon');
+    assert.deepEqual(amazon.map((o) => [o.nome, o.gancho, o.categoria, o.link]),
+      [['Organizador Cesto Duplo Natural', 'ORGANIZE SUA GELADEIRA', 'casa', 'https://www.amazon.com.br/dp/B0CKLTF6KM?tag=nova-20']]);
+  } finally {
+    config.amazon = { ativo: false, tag: '' };
+  }
 });

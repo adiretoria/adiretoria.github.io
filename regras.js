@@ -29,7 +29,10 @@ export const desconto = (o) => (positivo(o.de) && positivo(o.preco) && o.de > o.
 export function fimValidade(iso) {
   return Date.parse(/^\d{4}-\d{2}-\d{2}$/.test(iso ?? '') ? `${iso}T23:59:59.999-03:00` : iso);
 }
-export const cupomVigente = (c, agora = Date.now()) => !c.validade || fimValidade(c.validade) > agora;
+// Cupom sem validade informada só vale 24 h depois de publicado: código velho na vitrine leva a cupom vencido.
+export const CUPOM_SEM_VALIDADE_H = 24;
+export const cupomVigente = (c, agora = Date.now(), publicado = c.em) => c.validade ? fimValidade(c.validade) > agora
+  : Number.isFinite(Date.parse(publicado)) && agora - Date.parse(publicado) < CUPOM_SEM_VALIDADE_H * 3_600_000;
 
 const nomeCupom = (c) => (c.tipo === 'pct' ? `${String(c.valor).replace('.', ',')}% OFF` : `${reais(Math.round(c.valor * 100))} OFF`);
 const descontoCupom = (c, base) => {
@@ -54,7 +57,7 @@ export function precoComCondicoes(o, agora = Date.now()) {
     if (temPix) condicoes.push('A combinação desse cupom com Pix não foi confirmada. Confira o total na loja.');
   }
   const c = o.cupom;
-  const cupomValido = c && positivo(c.valor) && ['pct', 'fixo'].includes(c.tipo) && cupomVigente(c, agora);
+  const cupomValido = c && positivo(c.valor) && ['pct', 'fixo'].includes(c.tipo) && cupomVigente(c, agora, o.em);
   if (cupomValido && !o.jaComCupom) {
     const regras = [c.minimo ? `compra mínima de ${reais(c.minimo)}` : null, c.teto ? `desconto máximo de ${reais(c.teto)}` : null,
     c.validade ? `válido até ${dataCurta(new Date(fimValidade(c.validade)).toISOString())}` : null].filter(Boolean).join(', ');
@@ -95,7 +98,7 @@ export function situacao(o, agora = Date.now()) {
   const idadePreco = agora - conferido;
   return {
     recente: Number.isFinite(publicada) && idadePublicacao >= 0 && idadePublicacao < RECENTE_H * HORA,
-    precoAtual: Number.isFinite(conferido) && idadePreco >= 0 && idadePreco < VALIDADE_PRECO_H * HORA && !(o.jaComCupom && o.cupom && !cupomVigente(o.cupom,agora)),
+    precoAtual: Number.isFinite(conferido) && idadePreco >= 0 && idadePreco < VALIDADE_PRECO_H * HORA && !(o.jaComCupom && o.cupom && !cupomVigente(o.cupom,agora,o.em)),
     publicada: o.em, conferido: Number.isFinite(conferido) && conferido <= agora ? o.conferido : null,
   };
 }

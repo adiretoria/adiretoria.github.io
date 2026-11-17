@@ -54,6 +54,28 @@ export function linkAmazon(url, tag = config.amazon?.tag) {
   const asin = seguro && new URL(seguro).pathname.match(/\/(?:dp|gp\/product|gp\/aw\/d)\/([A-Z0-9]{10})(?:\/|$)/i)?.[1]?.toUpperCase();
   return asin && /^[a-z0-9][a-z0-9-]{1,60}-20$/.test(tag ?? '') ? { asin, link: `https://www.amazon.com.br/dp/${asin}?tag=${tag}` } : null;
 }
+// Nome real do produto Amazon sem abrir a página da loja: o trecho antes de /dp/ no link que chegou ao grupo
+// (ex.: amazon.com.br/Amaciante-Concentrado-Downy/dp/B098CL79W1). A frase de efeito do grupo vira só o "gancho".
+export function nomeDaUrlAmazon(url) {
+  const trecho = String(url ?? '').match(/amazon\.com\.br\/([^/?#]+)\/(?:dp|gp\/product)\//i)?.[1];
+  let nome = '';
+  try { nome = decodeURIComponent(trecho ?? '').replace(/[-_]+/g, ' ').replace(/\s+/g, ' ').trim(); } catch { return null; }
+  return (nome.match(/\p{L}/gu) ?? []).length >= 4 ? nome.slice(0, 160) : null;
+}
+// Frase de efeito em vez de nome: quase toda em maiúsculas ou com gíria de promoção.
+const GIRIA = /\b(aproveit|acaba|corre|precinho|pre[cç][aã]o|barat|goat|brab|imperd[ií]vel|achado|voltou|t[aá] muito|cxb)|d\+/i;
+export function pareceGancho(nome) {
+  const letras = String(nome ?? '').match(/\p{L}/gu) ?? [];
+  const maiusculas = letras.filter((l) => l !== l.toLowerCase()).length;
+  return letras.length < 8 || maiusculas / letras.length > 0.7 || GIRIA.test(nome);
+}
+// Card da Amazon só entra com nome real do produto; sem ele seria um clique às cegas (conteúdo raso).
+export function separarNomeAmazon(nome, url) {
+  const texto = String(nome ?? '').trim().slice(0, 220);
+  if (texto && !pareceGancho(texto)) return { nome: texto, gancho: null };
+  const daUrl = nomeDaUrlAmazon(url);
+  return daUrl ? { nome: daUrl, gancho: texto ? texto.slice(0, 120) : null } : null;
+}
 const amazonAtiva = () => config.amazon?.ativo === true && !!linkAmazon('https://www.amazon.com.br/dp/B000000000');
 
 // Ofertas: publicadas (confirmadas pelo canal) nos últimos N dias, sem revisão pendente, com preço (Amazon: sem preço,
@@ -68,13 +90,15 @@ export function montarDados(db) {
     where e.estado in ('pendente', 'processando') and v.oferta_id is not null)
     ${temProdutos ? `or chave in (select p.chave from envio_produtos p join entregas e on e.envio_id = p.envio_id
     where e.estado in ('pendente', 'processando'))` : ''}` : '';
-  const ofertas = db.prepare(`select id, loja, nome, preco_cent, preco_original_cent, preco_pix_cent, imagem, afiliado, selo, cupom_loja,
+  const temUrl = db.prepare("select 1 from pragma_table_info('ofertas') where name = 'url'").get();
+  const ofertas = db.prepare(`select id, loja, nome, ${temUrl ? 'url' : 'null url'}, preco_cent, preco_original_cent, preco_pix_cent, imagem, afiliado, selo, cupom_loja,
     coalesce(enviado_em, coletado) enviado_em, coletado, editado_em, categoria, fonte, dados_comerciais
     from ofertas where (enviado_em >= datetime('now', ?) ${naFila}) and revisao is null and (preco_cent > 0 or loja = 'amazon') and nome is not null
     order by coalesce(enviado_em, coletado) desc limit ?`).all(`-${config.dias} days`, config.maxOfertas).map((o) => {
     if (o.loja === 'amazon') {
       const amz = amazonAtiva() && linkAmazon(o.afiliado);
-      return amz ? { id: o.id, loja: 'amazon', nome: o.nome.trim().slice(0, 220), asin: amz.asin, link: amz.link, em: iso(o.enviado_em) } : null;
+      const nomes = amz && separarNomeAmazon(o.nome, o.url);
+      return nomes ? { id: o.id, loja: 'amazon', ...nomes, categoria: categoriaDoNome(nomes.nome), asin: amz.asin, link: amz.link, em: iso(o.enviado_em) } : null;
     }
     const link = linkLoja(o.afiliado, o.loja);
     if (!link || !NOME_LOJA[o.loja]) return null;
@@ -111,7 +135,7 @@ export function montarDados(db) {
   const temEsgotado = db.prepare("select 1 from pragma_table_info('cupons_lojas') where name = 'esgotado_em'").get();
   const cupons = db.prepare(`select id, loja, campanha, titulo, subtitulo, tipo, valor, minimo_cent, teto_cent, validade, enviado_em
     from cupons_lojas where enviado_em >= datetime('now', ?) and coalesce(tipo, '') != 'comissao' ${temEsgotado ? 'and esgotado_em is null' : ''}
-    order by enviado_em desc limit 200`).all(`-${config.dias} days`).filter(c=>cupomVigente(c)).map((c) => {
+    order by enviado_em desc limit 200`).all(`-${config.dias} days`).filter(c=>cupomVigente(c,Date.now(),iso(c.enviado_em))).map((c) => {
     const texto = (textoDoCupom.get(c.id) ?? textoLegado.get(`cupom ${NOME_LOJA[c.loja]} #${c.campanha}`))?.texto ?? '';
     const link = (texto.match(/https:\/\/[^\s*<>]+/g) ?? []).map(u=>linkLoja(u,c.loja)).find(Boolean)
       ?? (linkCampanha ? linkLoja(linkCampanha.get(c.id)?.link, c.loja) : null);
