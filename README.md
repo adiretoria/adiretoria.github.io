@@ -38,7 +38,6 @@ não afirma menor preço do mercado. O compartilhamento usa as mesmas condiçõe
 ## Configurar
 
 `exportador/config.json`:
-- `grupos.whatsapp` / `grupos.telegram`: links de convite (`https://chat.whatsapp.com/...`, `https://t.me/...`).
   O botão só aparece quando o link está preenchido.
 - `banco`: caminho do `radar.db` do robô (relativo à pasta do site; padrão: a pasta irmã `radar-ofertas`).
 - `dias` / `maxOfertas`: janela e limite da lista.

@@ -2,10 +2,6 @@
   "banco": "../radar-ofertas/dados/radar.db",
   "dias": 7,
   "maxOfertas": 400,
-  "grupos": {
-    "whatsapp": "https://chat.whatsapp.com/EClfrE2QYTU32PWZA2pefW",
-    "telegram": "https://t.me/adiretoriacompras"
-  },
   "amazon": {
     "ativo": true,
     "tag": "adiretoria02-20"

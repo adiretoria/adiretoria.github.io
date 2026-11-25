@@ -27,12 +27,6 @@ img { display: block; max-width: 100%; }
 .marca { text-decoration: none; display: flex; flex-direction: column; gap: 8px; }
 .marca img { height: 36px; width: auto; }
 .marca .rotulo { font-size: 10.5px; color: #C9CED8; }
-.grupos { display: flex; gap: 10px; flex-wrap: wrap; }
-.grupo { display: inline-flex; align-items: center; min-height: 46px; padding: 10px 20px; font-weight: 700; font-size: 15px; text-decoration: none; border-radius: 4px; }
-.grupo-wa { background: var(--lima); color: var(--azul); }
-.grupo-tg { border: 1.5px solid var(--papel); color: var(--papel); }
-.grupo:hover { filter: brightness(1.08); }
-.grupo[hidden] { display: none; }
 
 main { max-width: 1200px; margin: 0 auto; padding: 0 24px 72px; }
 main:focus { outline: none; }
@@ -143,9 +137,6 @@ input:focus, select:focus { outline: none; box-shadow: 0 0 0 4px var(--lima); }
 @media (max-width: 760px) {
   .topo-dentro { padding: 16px; gap: 14px; }
   .marca img { height: 28px; }
-  .grupos { width: 100%; }
-  .grupo { flex: 1; justify-content: center; font-size: 14px; padding: 10px 12px; white-space: nowrap; }
-  .grupo .longo { display: none; }
   main { padding: 0 16px 52px; }
   .abertura { margin: 0 -16px; padding: 28px 16px 22px 44px;
     background: linear-gradient(90deg, transparent 20px, var(--coral-claro) 20px, var(--coral-claro) 25px, transparent 25px),
@@ -189,11 +180,7 @@ input:focus, select:focus { outline: none; box-shadow: 0 0 0 4px var(--lima); }
 .ordens button[aria-pressed='true'] { background: var(--azul); color: var(--lima); }
 .filtros { grid-template-columns: minmax(220px, 1fr) auto auto; }
 
-/* Compartilhar no WhatsApp (canto da foto) */
 .oferta { position: relative; }
-.compartilhar { position: absolute; z-index: 2; top: 10px; left: 10px; display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; background: var(--branco); color: #1A8D4A; border: 2px solid var(--azul); }
-.compartilhar svg { width: 22px; height: 22px; }
-.compartilhar:hover { background: var(--lima); }
 .compartilhada .oferta-link { outline: 5px solid var(--lima); outline-offset: 3px; }
 
 /* Faixa "Maiores descontos de hoje" */
@@ -215,7 +202,6 @@ input:focus, select:focus { outline: none; box-shadow: 0 0 0 4px var(--lima); }
 .destaque-preco { font-family: var(--display); font-size: 22px; line-height: 1; }
 
 /* Barra fixa no celular */
-.barra-grupos { display: none; }
 @media (max-width: 760px) {
   .filtros { grid-template-columns: minmax(0, 1fr); }
   .ordens { flex-wrap: nowrap; overflow-x: auto; }
@@ -227,13 +213,7 @@ input:focus, select:focus { outline: none; box-shadow: 0 0 0 4px var(--lima); }
   .oferta .carimbo { top: auto; bottom: 8px; left: 6px; right: auto; }
   .oferta .corpo { padding: 10px 12px 12px; gap: 3px; }
   .oferta .ver { padding: 9px; font-size: 14px; }
-  .oferta .compartilhar { width: 44px; height: 44px; top: 6px; left: 6px; }
-  .oferta .compartilhar svg { width: 18px; height: 18px; }
   .destaques-lista { grid-auto-columns: 150px; }
-  .barra-grupos { position: fixed; z-index: 20; left: 0; right: 0; bottom: 0; display: flex; gap: 8px; padding: 10px 12px calc(10px + env(safe-area-inset-bottom)); background: var(--azul); box-shadow: 0 -4px 0 rgba(16, 27, 45, .15); }
-  .barra-grupos[hidden] { display: none; }
-  .barra-grupos .grupo { flex: 1; justify-content: center; }
-  .barra-grupos .grupo-tg { flex: 0 0 auto; }
   .rodape-dentro { padding-bottom: 96px; }
 }
 
@@ -325,7 +305,6 @@ html { scroll-padding-bottom: 90px; }
 .card-acoes { display: flex; gap: 8px; align-items: stretch; margin-top: 10px; }
 .card-acoes .ver { flex: 1; margin: 0; text-decoration: none; display: flex; align-items: center; justify-content: center; min-height: 44px; }
 .card-acoes .ver:hover, .card-acoes .ver:focus-visible { background: var(--lima); color: var(--azul); }
-.oferta-amazon .card-acoes .compartilhar { position: static; flex: 0 0 44px; width: 44px; height: 44px; align-self: center; }
 @media (max-width: 760px) {
   .amazon-capa { min-height: 52px; padding: 8px 12px; }
   .amazon-categoria { font-size: 18px; }
