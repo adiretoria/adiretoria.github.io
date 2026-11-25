@@ -146,8 +146,7 @@ export function montarDados(db) {
     };
   }).filter(Boolean).slice(0,100);
 
-  const grupos = Object.fromEntries(Object.entries(config.grupos).filter(([, u]) => /^https:\/\/(chat\.whatsapp\.com|whatsapp\.com|t\.me)\//.test(u)));
-  return { grupos, amazon: amazonAtiva() ? { tag: config.amazon.tag } : null, ofertas, cupons };
+  return { amazon: amazonAtiva() ? { tag: config.amazon.tag } : null, ofertas, cupons };
 }
 
 function git(...args) {

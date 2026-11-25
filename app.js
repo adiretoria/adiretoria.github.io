@@ -1,6 +1,6 @@
 // Dados públicos entram como texto; as regras de preço também são usadas pelo exportador e pelos testes.
 import { LOJAS, CATEGORIAS, FAIXAS, reais, semAcento, desconto, linkLoja, precoComCondicoes, situacao,
-  quandoTexto, haQuanto, escolhasDaDiretoria, motivos, textoCompartilhar, filtrarOfertas, cupomVigente, fimValidade, categoriaDoNome } from './regras.js?v=20261117a';
+  quandoTexto, haQuanto, escolhasDaDiretoria, motivos, filtrarOfertas, cupomVigente, fimValidade, categoriaDoNome } from './regras.js?v=20261117a';
 const ATALHOS_AMAZON=[['Ofertas do Dia','/deals'],['Mais vendidos','/gp/bestsellers'],['Eletrônicos','/gp/bestsellers/electronics'],['Informática','/gp/bestsellers/computers'],
   ['Casa e cozinha','/gp/bestsellers/kitchen'],['Games','/gp/bestsellers/videogames'],['Beleza','/gp/bestsellers/beauty'],['Livros','/gp/bestsellers/books']];
 const SITE = 'https://adiretoria.github.io/';
@@ -11,8 +11,8 @@ const CHECK = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 13.5l3.6-
 const LOGOS = {mercadolivre:'img/lojas/mercadolivre.svg',shopee:'img/lojas/shopee.svg',magalu:'img/lojas/magalu.svg'};
 const padrao = {aba:'ofertas',q:'',loja:'',categoria:'',faixa:'',anteriores:false,ordem:'recentes',limite:POR_PAGINA,oferta:null};
 let estado = {...padrao};
-let dados = {ofertas:[],cupons:[],grupos:{}};
-let timer, observer, carregando=false, assinatura='';
+let dados = {ofertas:[],cupons:[]};
+let timer, carregando=false, assinatura='';
 
 function linhaLoja(el, loja) {
   el.replaceChildren('No ',Object.assign(document.createElement('strong'),{textContent:LOJAS[loja]}));
@@ -41,10 +41,8 @@ function atualizar(mudancas={}) {
 const buscaCasa = texto => semAcento(estado.q).split(/\s+/).filter(Boolean).every(p=>semAcento(texto).includes(p));
 const cuponsValidos = agora => dados.cupons.filter(c=>cupomVigente(c,agora));
 const filtrarCupons = agora => cuponsValidos(agora).filter(c=>(!estado.loja||c.loja===estado.loja)&&buscaCasa(`${c.titulo} ${c.detalhe??''} ${LOJAS[c.loja]}`));
-function ligarCompartilhar(el,o,agora) {
-  const a=el.querySelector('.compartilhar');
-  a.href=`https://wa.me/?text=${encodeURIComponent(textoCompartilhar(o,SITE,agora))}`;
-  a.setAttribute('aria-label',`Compartilhar ${o.nome} no WhatsApp`);
+// Oferta aberta por link (?oferta=id): fica destacada na lista.
+function marcarCompartilhada(el,o) {
   if(o.id===estado.oferta)el.classList.add('compartilhada');
 }
 function imagem(el,src) {
@@ -61,7 +59,7 @@ function cartaoAmazon(o,agora) {
   el.querySelector('.gancho').textContent=o.gancho??'';
   el.querySelector('.nome').textContent=o.nome;
   el.querySelector('.quando').textContent=`Selecionado ${haQuanto(o.em,agora)}`;
-  ligarCompartilhar(el,o,agora);return el;
+  marcarCompartilhada(el,o);return el;
 }
 function cartaoOferta(o,agora) {
   if(o.loja==='amazon')return cartaoAmazon(o,agora);
@@ -87,7 +85,7 @@ function cartaoOferta(o,agora) {
   if(!o.origem)razoes.push('Origem da seleção não informada.');
   if(pct)razoes.push('A referência é informada pela loja; não é uma comparação de todo o mercado.');
   el.querySelector('.condicoes ul').replaceChildren(...razoes.map(t=>Object.assign(document.createElement('li'),{textContent:t})));
-  ligarCompartilhar(el,o,agora);return el;
+  marcarCompartilhada(el,o);return el;
 }
 function cartaoCupom(c) {
   const el=$('modelo-cupom').content.firstElementChild.cloneNode(true);
@@ -202,17 +200,7 @@ async function carregar() {
       (o.loja==='amazon'?/^[A-Z0-9]{10}$/.test(o.asin):Number.isFinite(o.preco)&&o.preco>0)).map(o=>({...o,
         img:/^https:\/\/[^\s"'<>()]+$/.test(o.img??'')?o.img:null,gancho:typeof o.gancho==='string'?o.gancho.slice(0,120):null,categoria:Object.hasOwn(CATEGORIAS,o.categoria)?o.categoria:categoriaDoNome(o.nome)}));
     const cupons=j.cupons.filter(c=>c.loja!=='amazon'&&Object.hasOwn(LOJAS,c.loja)&&linkLoja(c.link,c.loja));
-    dados={ofertas,cupons,grupos:j.grupos??{}};
-    for(const canal of ['whatsapp','telegram']) {
-      let url;try{url=new URL(dados.grupos[canal]);}catch{}
-      const hosts=canal==='whatsapp'?['chat.whatsapp.com','whatsapp.com']:['t.me'];
-      const valida=url&&url.protocol==='https:'&&!url.port&&!url.username&&!url.password&&hosts.includes(url.hostname);
-      for(const id of [`grupo-${canal}`,`barra-${canal}`]){$(id).hidden=!valida;if(valida)$(id).href=url.href;}
-    }
-    observer?.disconnect();
-    if('IntersectionObserver' in window&&(!$('grupo-whatsapp').hidden||!$('grupo-telegram').hidden)) {
-      observer=new IntersectionObserver(([e])=>{$('barra-grupos').hidden=e.isIntersecting;});observer.observe(document.querySelector('.grupos'));
-    }
+    dados={ofertas,cupons};
     // Declaração já está no HTML (visível sem JavaScript); só some se a Amazon estiver desligada.
     for(const id of ['aviso-associado','declaracao-amazon'])$(id).hidden=!j.amazon;
     // Atalhos para as páginas de ofertas da Amazon, com a tag (sem preço nem imagem: só a Amazon mostra).
